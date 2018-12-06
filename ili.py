@@ -1,6 +1,6 @@
 import sys, os, json, copy, re
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, pyqtSignal, QRegExp
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, \
     NavigationToolbar2QT
@@ -42,8 +42,8 @@ class LoadFiles(QWidget):
         self.imgplt = mpimg.imread(imagepath)
 
         cellProfImgPath = celldist #'/home/renat/EMBL/spaceM_Luca/linux/testSamples/c2_SELECTED/Analysis/scAnalysis/Molecular_features/marks_flitered_fluo.npy'
-        self.cellProfImg = np.load(cellProfImgPath)
-        self.pmi = self.cellProfImg[0]
+        self.cellProfImg = np.load(cellProfImgPath) if cellProfImgPath else ''
+        self.pmi = self.cellProfImg[0] if self.cellProfImg else []
 
         self.componentState.dataUploaded = True
         self.mols_list.update_mols_df(self.mol_names[0], self.mols_df)
@@ -110,8 +110,6 @@ class Tabs(QWidget):
     degreeSignal = pyqtSignal(int)
     logScaleSignal = pyqtSignal(bool)
     exportConfigsSingal = pyqtSignal()
-    plotImageSignal = pyqtSignal(str)
-    setQuantileVal = pyqtSignal(int)
 
     def __init__(self, state, parent):
         super(QWidget, self).__init__(parent)
@@ -120,7 +118,6 @@ class Tabs(QWidget):
 
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
-        self.tab2 = QWidget()
 
         # GroupBox
         self.groupBox1 = QGroupBox("Rotate clockwise: (Rotation is always relative to the initial position)")
@@ -169,27 +166,11 @@ class Tabs(QWidget):
         self.btn_save_configs = QPushButton('Save configurations')
         self.btn_save_configs.clicked.connect(self.export_configs)
 
-        self.btn_open = QPushButton('Open Image')
-        self.btn_open.clicked.connect(self.open_image)
-
-        self.btn_quantile_set = QPushButton('Set quantile')
-        self.btn_quantile_set.clicked.connect(self.quantile_handler)
-
-        #Input fields for quantiles
-        self.qunt_label_low = QLabel()
-        self.qunt_label_low.setText('Set low quantile level:')
-
-        quantile_regex = QRegExp("^[1-9][0-9]?$|^100$")
-        self.quant_inp_low = QLineEdit(self)
-        quant_inp_low_valid = QRegExpValidator(quantile_regex, self.quant_inp_low)
-        self.quant_inp_low.setValidator(quant_inp_low_valid)
-
         #Slider handlers
         self.slider.valueChanged.connect(self.spotsSizeSignal)
 
         # Add tabs
         self.tabs.addTab(self.tab1, "Transformations")
-        self.tabs.addTab(self.tab2, "Image processing(Cell profiler)")
         # self.tabs.addTab(self.tab3, "Mapping")
 
         # Create 1st tab
@@ -205,17 +186,8 @@ class Tabs(QWidget):
         self.tab1.layout.addWidget(self.logscale)
         self.tab1.layout.addWidget(self.btn_save_configs)
 
-        # Create 2nd tab
-        self.tab2.layout = QVBoxLayout(self)
-        self.tab2.layout.addWidget(self.btn_open)
-        self.tab2.layout.addWidget(self.qunt_label_low)
-        self.tab2.layout.addWidget(self.quant_inp_low)
-        self.tab2.layout.addWidget(self.btn_quantile_set)
-
         self.tab1.layout.addStretch()
         self.tab1.setLayout(self.tab1.layout)
-        self.tab2.layout.addStretch()
-        self.tab2.setLayout(self.tab2.layout)
 
         self.layout.addWidget(self.tabs)
 
@@ -271,19 +243,6 @@ class Tabs(QWidget):
             self.componentState.history.clear()
             print(self.componentState.history)
 
-    def open_image(self):
-        try:
-            options = QFileDialog.Options()
-            options |= QFileDialog.DontUseNativeDialog
-            self.inpFilePath, _ = QFileDialog.getOpenFileName(self, "Open File",
-                                                           "All Files (*);;TIFF(*.tiff, *.tif)",
-                                                           options=options)
-            self.outFilePath = self.inpFilePath
-            self.plotImageSignal.emit(self.inpFilePath)
-        except Exception as e:
-            print('File cannot be imported')
-            print(e.message, e.args)
-
     def spotsSize(self, sval):
         if self.componentState.dataUploaded:
             self.spotsSizeSignal.emit(sval)
@@ -319,9 +278,6 @@ class Tabs(QWidget):
         with open("AM_analysis_config.txt", "w") as f:
             f.write(json.dumps(self.componentState.history))
 
-    def quantile_handler(self, val):
-        self.setQuantileVal.emit(val)
-
     @staticmethod
     def remove_double_int(history):
         i = 0
@@ -348,6 +304,7 @@ class Window(QMainWindow):
         self.layout = View(self.getWidgets)
         self.central_widget.setLayout(self.layout.lt)
         self.methods = Controller(self.getWidgets, self.state)
+        self.initWinUI()
         np.set_printoptions(threshold=np.nan)
 
     def initWinUI(self):
@@ -393,8 +350,6 @@ class Controller:
         self.tabs.flippingSignal.connect(self.flip)
         self.tabs.spotsSizeSignal.connect(self.changeSpotsSize)
         self.tabs.logScaleSignal.connect(self.enableLogScale)
-        self.tabs.plotImageSignal.connect(self.plotImage)
-        self.tabs.setQuantileVal.connect(self.setQuantile)
 
         # Define transforming functions
         self.trans_func = {}
@@ -466,15 +421,6 @@ class Controller:
         else:
             self.redraw()
 
-    def plotImage(self, img_path):
-        self.canvas.clean_plot_image(img_path)
-
-    def setQuantile(self, pc):
-
-        self.canvas.clean_plot_upd_image(pc)
-        # Image should be saved in uint8 format
-        # tiff.imsave(adj_p, adjusted.astype('uint8'))
-
 class View:
 
     def __init__(self, widgets):
@@ -521,12 +467,13 @@ class MatplotlibArea(FigureCanvas):
         self.ax1.scatter(arrX, arrY, s, c=arrZ, norm=self.norm, edgecolor='')
         self.ax1.callbacks.connect('xlim_changed', self.on_xlims_change)
         self.ax1.callbacks.connect('ylim_changed', self.on_ylims_change)
-        rf = int(pmi.shape[0]**0.5)
-        if pmi is not None:
+        if len(pmi) > 0 and pmi is not None:
+            rf = int(pmi.shape[0] ** 0.5)
             self.ax2.imshow(np.reshape(pmi, (rf, rf)))
+            self.ax3.imshow(np.reshape(list(arrZ), (rf, rf)), norm=self.norm)
         # self.ax2.axis('off')
         # self.ax3.axis('off')
-        self.ax3.imshow(np.reshape(list(arrZ), (rf, rf)), norm=self.norm)
+
 
     def on_xlims_change(self, axes):
         self.limX = axes.get_xlim()
@@ -579,13 +526,10 @@ if __name__ == '__main__':
     parser.add_argument('-celldist', help='Cell distribution *.npy file obtained after cell segmentation')
 
     args = parser.parse_args()
-    args.csv = '/home/renat/EMBL/spaceM_Luca/linux/testSamples/c2_SELECTED/Analysis/ili/sm_annotation_detections.csv'
-    args.img = '/home/renat/EMBL/spaceM_Luca/linux/testSamples/c2_SELECTED/Analysis/ili/FLUO_crop_bin1x1.png'
-    args.celldist = '/home/renat/EMBL/spaceM_Luca/linux/testSamples/c2_SELECTED/Analysis/CellProfilerAnalysis/cellDistribution_MALDI.npy'
 
-    if args.csv and args.img and args.celldist:
+    if args.csv and args.img:
         app = QApplication(sys.argv)
-        main = Window(csv=args.csv, img=args.img, celldist=args.celldist)
+        main = Window(csv=args.csv, img=args.img)
         sys.exit(app.exec_())
     elif args.csv is None:
         print('No path to csv file provided')

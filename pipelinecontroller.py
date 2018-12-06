@@ -104,7 +104,6 @@ class FindFilterFiducials(Analysis):
 
 class RegisterPrePostMaldi(Analysis):
     ILI_FDR = 0.2
-    # MS_EMAIL = "ngm.renat@gmail.com"
 
     def step1(self):
         ## For this step access to internet and Metaspace is needed
