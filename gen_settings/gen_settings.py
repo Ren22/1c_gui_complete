@@ -64,7 +64,7 @@ class Gen_Settings(QWidget, Ui_gen_settings):
     def define_composite_img_path(self):
         path = self.file_path_finder()
         global_vars.set_composite_path(path)
-        self.lineEditStitchedPostImage.setText(path)
+        self.lineEditCompositeImg.setText(path)
 
     def define_fiji_path(self):
         path = self.file_path_finder()

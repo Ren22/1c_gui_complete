@@ -526,6 +526,8 @@ if __name__ == '__main__':
     parser.add_argument('-celldist', help='Cell distribution *.npy file obtained after cell segmentation')
 
     args = parser.parse_args()
+    args.csv = '/home/renat/EMBL/Sharaz_images/rhodamin/Analysis/ili/sm_annotation_detections.csv'
+    args.img = '/home/renat/EMBL/Sharaz_images/rhodamin/Analysis/ili/FLUO_crop_bin1x1.png'
 
     if args.csv and args.img:
         app = QApplication(sys.argv)

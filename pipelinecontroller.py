@@ -1,6 +1,5 @@
 import os, logging
 from subprocess import run, call, Popen
-from spaceM.Pipeline import ablationMarksFinder as AMFinder
 from spaceM.Pipeline import ablationMarksFilter as AMFilter
 from spaceM.Pipeline import fiducialsFinder as FFinder
 from spaceM.Pipeline import registration
@@ -28,6 +27,7 @@ def prepare_paths():
     }
     return all_paths
 
+
 def ion2fluoTF(ion_img):
     """Image transformation to apply on ion image for registration.
     Args:
@@ -46,10 +46,13 @@ class Analysis():
         self.PYTHON_PATH = global_vars.python_path
         self.STITCHED_PRE = global_vars.stitchedImgPreMPath
         self.STITCHED_POST = global_vars.stitchedImgPostMPath
+        self.STITCHED_PRE_GF = '/home/renat/EMBL/Sharaz_images/rhodamin/stitched/pre/bf'
+        self.STITCHED_POST_GF = '/home/renat/EMBL/Sharaz_images/rhodamin/stitched/post/bf'
         self.COMPOSITE_PNG = global_vars.compositeImgPath
         self.AM_CURATOR = './MaldiHelper.py'
-        self.CROPPED_PM_OUT_PATH = self.MFA + 'SpotFinder/'
+        self.CROPPED_PM_OUT_PATH = self.MFA + 'gridFit/'
         self.SPOT_FINDER = self.MFA + 'SpotFinder/'
+        self.GRIDFIT = self.MFA + 'gridFit/'
         self.ILI = '/home/renat/EMBL/spaceM_Luca/linux/1c_gui_complete/ili.py'
         self.CP = global_vars.cellprofilerPath
 
@@ -60,26 +63,18 @@ class FindAMinPM(Analysis):
 
     def step1(self):
         print('cropPMimage started')
-        if not os.path.exists(self.SPOT_FINDER):
-            os.makedirs(self.SPOT_FINDER)
+        if not os.path.exists(self.GRIDFIT):
+            os.makedirs(self.GRIDFIT)
         run(["{}".format(self.PYTHON_PATH), "{}".format(self.AM_CURATOR), "{}".format(self.STITCHED_POST),
-             "{}croppedPM.tiff".format(self.CROPPED_PM_OUT_PATH)])
+             "{}AM_cropped.tif".format(self.GRIDFIT)])
         print('cropPMimage finished')
 
     def step2(self):
-        print('amfinder started')
-        AMFinder(self.MF)
-        print('amfinder finished')
-
-    def step3(self):
-        print('cropAM started')
-        run(["{}".format(self.PYTHON_PATH), "{}".format(self.AM_CURATOR), "{}".format(self.MFA + 'gridFit/ablation_marks_XY.npy'), "{}".format(self.MFA + 'gridFit/ablation_marks_XY.npy')])
-        print('cropAM finished')
-
-    def step4(self):
-        print('Ablation mark filtering started')
-        AMFilter(self.MF, self.STITCHED_POST)
-        print('Ablation mark filtering finished')
+        if not os.path.exists(self.GRIDFIT):
+            os.makedirs(self.GRIDFIT)
+        print('Ablation mark finding and filtering started')
+        AMFilter(self.MF, self.STITCHED_POST, self.GRIDFIT)
+        print('Ablation mark finding and filtering finished')
 
 
 class FindFilterFiducials(Analysis):
@@ -88,7 +83,7 @@ class FindFilterFiducials(Analysis):
 
     def step1(self):
         print("Searching for fiducials started")
-        FFinder(self.MF, self.STITCHED_PRE, self.STITCHED_POST)
+        FFinder(self.MF, self.STITCHED_PRE_GF, self.STITCHED_POST_GF)
         print("Searching for fiducials finished")
 
     def step2(self):
@@ -103,7 +98,7 @@ class FindFilterFiducials(Analysis):
 
 
 class RegisterPrePostMaldi(Analysis):
-    ILI_FDR = 0.2
+    ILI_FDR = 0.5
 
     def step1(self):
         ## For this step access to internet and Metaspace is needed
@@ -135,7 +130,7 @@ class CellSegment(Analysis):
         csv = self.MFA + 'ili/sm_annotation_detections.csv'
         img = self.MFA + 'ili/FLUO_crop_bin1x1.png'
         celldist = '' #self.MFA + 'CellProfilerAnalysis/cellDistribution_MALDI.npy'
-        # execut_string = '{} {} -csv {} -img {} -celldist {}'.format(self.PYTHON_PATH, self.ILI, csv, img, celldist)
+        execut_string = '{} {} -csv {} -img {} -celldist {}'.format(self.PYTHON_PATH, self.ILI, csv, img, celldist)
 
         # call(execut_string)
         run(["{}".format(self.PYTHON_PATH), "{}".format(self.ILI)])
@@ -145,7 +140,4 @@ class CellSegment(Analysis):
 class GenerateCSV(Analysis):
     def step1(self):
         spatioMolecularMatrix(self.MF, tf_obj=ion2fluoTF)
-
-
-
 

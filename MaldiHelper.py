@@ -265,6 +265,7 @@ class PlotCanvas(FigureCanvas):
         self.ind = []
         self.pltTitle = pltTitle
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
+        self.fig.gca().invert_yaxis()
         self.ax = self.fig.add_subplot(111)
         self.ax.set_title(self.pltTitle)
         self.ax.callbacks.connect('xlim_changed', self.on_xlims_change)
@@ -290,6 +291,7 @@ class PlotCanvas(FigureCanvas):
     def profScatter(self, x_arr, y_arr):
         if len(x_arr) >= 100000 or len(y_arr) >= 100000:
             reducedIndexes = random.sample(range(len(x_arr)), 35000)
+
             self.ax.scatter(x_arr[reducedIndexes], y_arr[reducedIndexes], 5)
         else:
             self.ax.scatter(x_arr, y_arr, 5)
@@ -300,8 +302,9 @@ class PlotCanvas(FigureCanvas):
     def plot(self):
         self.profScatter(self.currX, self.currY)
         self.ax.axis('equal')
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
+        # Uncomment to enable ticks on plot
+        # self.ax.set_xticks([])
+        # self.ax.set_yticks([])
 
         def toggle_selector(event):
             if event.key in ['Q', 'q'] and toggle_selector.RS.active:
@@ -336,8 +339,6 @@ class PlotCanvas(FigureCanvas):
         self.ax.cla()
         self.profScatter(x_arr, y_arr)
         self.ax.axis('equal')
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
         self.draw()
 
     def refresh_plot_deletion(self, x_arr, y_arr):
@@ -345,8 +346,6 @@ class PlotCanvas(FigureCanvas):
         self.profScatter(x_arr, y_arr)
         self.ax.set_xlim(self.limX)
         self.ax.set_ylim(self.limY)
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
         self.draw()
 
     def on_activated(self, action, x1, y1, x2, y2):
@@ -385,12 +384,11 @@ class PlotCanvasImg(FigureCanvas):
         self.limX = ()
         self.limY = ()
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
+        self.fig.gca().invert_yaxis()
         self.ax = self.fig.add_subplot(111)
         self.ax.set_title(self.img['pltTitle'])
         self.ax.callbacks.connect('xlim_changed', self.on_xlims_change)
         self.ax.callbacks.connect('ylim_changed', self.on_ylims_change)
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
         FigureCanvas.__init__(self, self.fig)
         self.set_init_coords()
         self.initCropCoords(img)
@@ -427,8 +425,6 @@ class PlotCanvasImg(FigureCanvas):
         self.ax.set_title(self.img['pltTitle'])
         self.ax.callbacks.connect('xlim_changed', self.on_xlims_change)
         self.ax.callbacks.connect('ylim_changed', self.on_ylims_change)
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
         self.fig.canvas.draw_idle()
 
     def on_xlims_change(self, axes):

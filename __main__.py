@@ -23,42 +23,37 @@ class NewThread(QThread):
         QThread.__init__(self)
 
     def run(self):
-        self.pipeStatusToLogger.emit('CropPMimage started')
-        find_am = FindAMinPM()
-        find_am.step1()
-        self.progressBarSig.emit(5)
-        self.pipeStatusToLogger.emit('CropPMimage finished')
-        self.pipeStatusToLogger.emit('Ablation mark finder started')
-        find_am.step2()
-        self.progressBarSig.emit(10)
-        self.pipeStatusToLogger.emit('Ablation mark finder finished')
-        self.pipeStatusToLogger.emit('Cropping of AM started')
-        find_am.step3()
-        self.progressBarSig.emit(15)
-        self.pipeStatusToLogger.emit('Cropping of AM finished')
-        self.pipeStatusToLogger.emit('Ablation mark filtering started')
-        find_am.step4()
-        self.progressBarSig.emit(20)
-        self.pipeStatusToLogger.emit('Ablation mark filtering finished')
+        # find_am = FindAMinPM()
+        # find_am.step1()
+        # self.progressBarSig.emit(10)
+        # self.pipeStatusToLogger.emit('CropPMimage finished')
+        # self.pipeStatusToLogger.emit('Ablation mark finder started')
+        # find_am.step2()
+        #
+        # self.progressBarSig.emit(20)
+        # self.pipeStatusToLogger.emit('Cropping of AM finished')
+        # self.pipeStatusToLogger.emit('Ablation mark filtering started')
+        #
+        # filter_fiducials = FindFilterFiducials()
+        # self.pipeStatusToLogger.emit("Searching for fiducials started")
+        # filter_fiducials.step1()
+        # self.progressBarSig.emit(30)
+        # self.pipeStatusToLogger.emit("Searching for fiducials finished")
+        # self.pipeStatusToLogger.emit('Fiducials filtering on PRE maldi image started')
+        # filter_fiducials.step2()
+        # self.progressBarSig.emit(40)
+        # self.pipeStatusToLogger.emit('Fiducials filtering on PRE maldi image finished')
+        # reg_pre_post = RegisterPrePostMaldi()
+        # self.pipeStatusToLogger.emit('Registration of Pre and Post maldi fidicuals and metaspace based annotation started')
+        # reg_pre_post.step1()
+        # self.pipeStatusToLogger.emit('Registration of Pre and Post maldi fidicuals and metaspace based annotation finished')
+        # self.progressBarSig.emit(65)
 
-        filter_fiducials = FindFilterFiducials()
-        self.pipeStatusToLogger.emit("Searching for fiducials started")
-        filter_fiducials.step1()
-        self.progressBarSig.emit(30)
-        self.pipeStatusToLogger.emit("Searching for fiducials finished")
-        self.pipeStatusToLogger.emit('Fiducials filtering on PRE maldi image started')
-        filter_fiducials.step2()
-        self.progressBarSig.emit(40)
-        self.pipeStatusToLogger.emit('Fiducials filtering on PRE maldi image finished')
+        # cell_seg = CellSegment()
+        # cell_seg.step3()
 
-        reg_pre_post = RegisterPrePostMaldi()
-        self.pipeStatusToLogger.emit('Registration of Pre and Post maldi fidicuals and metaspace based annotation started')
-        reg_pre_post.step1()
-        self.pipeStatusToLogger.emit('Registration of Pre and Post maldi fidicuals and metaspace based annotation finished')
-        self.progressBarSig.emit(65)
-
-        cell_seg = CellSegment()
-        cell_seg.step3()
+        gen_csv_features = GenerateCSV()
+        gen_csv_features.step1()
 
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -83,13 +78,13 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.fiji_path = self.widget.get_fiji_path()
         self.cellprofiler_path = self.widget.get_cellprofiler_path()
         #
-        if self.inp_path and self.python_path and self.stitchedImgPreMPath and self.stitchedImgPostMPath \
-                and self.composite_img_path and self.fiji_path:
-            self.run_new_Thread.start()
-            self.run_new_Thread.progressBarSig.connect(self.update_pb)
-            self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
-        else:
-            QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and not empty")
+        # if self.inp_path and self.python_path and self.stitchedImgPreMPath and self.stitchedImgPostMPath \
+        #         and self.composite_img_path and self.fiji_path:
+        self.run_new_Thread.start()
+        self.run_new_Thread.progressBarSig.connect(self.update_pb)
+        self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
+        # else:
+        #     QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and not empty")
 
     def update_pb(self, val):
         self.progressBar.setValue(val)
@@ -112,7 +107,6 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             gen_csv = GenerateCSV()
             gen_csv.step1()
             self.progressBar.setValue(100)
-
 
 def main():
     app = QApplication(sys.argv)

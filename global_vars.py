@@ -1,11 +1,11 @@
 class GlobalVars:
     def __init__(self):
-        self.inp_path =  ''
-        self.python_path =  ''
-        self.stitchedImgPreMPath = ''
-        self.stitchedImgPostMPath = ''
-        self.compositeImgPath = ''
-        self.fijiPath = ''
+        self.inp_path =  '/home/renat/EMBL/Sharaz_images/rhodamin'
+        self.python_path =  '/home/renat/miniconda3/bin/python'
+        self.stitchedImgPreMPath = '/home/renat/EMBL/Sharaz_images/rhodamin/stitched/pre/bf'
+        self.stitchedImgPostMPath = '/home/renat/EMBL/Sharaz_images/rhodamin/stitched/post/bf'
+        self.compositeImgPath = '/home/renat/EMBL/Sharaz_images/rhodamin/stitched/Composite.png'
+        self.fijiPath = '/home/renat/EMBL/software/Fiji.app/ImageJ-linux64'
         self.cellprofilerPath = ''
 
     def set_inp_path(self, new_path):
