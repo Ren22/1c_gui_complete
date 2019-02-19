@@ -252,7 +252,7 @@ class WidgetPlot(QWidget):
                                 "Save -> will overwrite the existing file \n"
                                 "If you have detected bugs, things just go wrong or you have other questions/suggestions,\n"
                                 "please contact me :)\n"
-                                "renat.nigmetzianov@embl.de ")
+                                "renat.nigmetzianov(at)embl.de ")
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, arrX, arrY, pltTitle, width=5, height=4, dpi=100):
@@ -265,7 +265,6 @@ class PlotCanvas(FigureCanvas):
         self.ind = []
         self.pltTitle = pltTitle
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
-        self.fig.gca().invert_yaxis()
         self.ax = self.fig.add_subplot(111)
         self.ax.set_title(self.pltTitle)
         self.ax.callbacks.connect('xlim_changed', self.on_xlims_change)
@@ -384,7 +383,6 @@ class PlotCanvasImg(FigureCanvas):
         self.limX = ()
         self.limY = ()
         self.fig = plt.figure(figsize=(width, height), dpi=dpi)
-        self.fig.gca().invert_yaxis()
         self.ax = self.fig.add_subplot(111)
         self.ax.set_title(self.img['pltTitle'])
         self.ax.callbacks.connect('xlim_changed', self.on_xlims_change)
@@ -398,14 +396,6 @@ class PlotCanvasImg(FigureCanvas):
         self.imgWidth, self.imgHeight = self.img['src'].size
         self.refImgWidth = deepcopy(self.imgWidth)
         self.refImgHeight = deepcopy(self.imgHeight)
-        self.x1_ = 0
-        self.y1_ = 0
-        self.x2_ = self.imgWidth
-        self.y2_ = 0
-        self.x3_ = 0
-        self.y3_ = self.imgHeight
-        self.x4_ = self.imgWidth
-        self.y4_ = self.imgHeight
         self.dx1, self.dx2, self.dx3, self.dx4 = [], [], [], []
         self.dy1, self.dy2, self.dy3, self.dy4 = [], [], [], []
         self.dx_dy = img['croppedImgCoords']
@@ -467,28 +457,20 @@ class PlotCanvasImg(FigureCanvas):
     def on_activated(self, action, x1, y1, x2, y2):
         if x1 and y1 and x2 and y2:
             if action == 'Crop':
-                self.x1_ = x1
-                self.y1_ = y1
-                self.dx1.append(self.x1_)
-                self.dy1.append(self.y1_)
-                self.x2_ = x2
-                self.y2_ = y1
-                self.dx2.append(self.imgWidth - self.x2_)
-                self.dy2.append(self.y1_)
-                self.x3_ = x1
-                self.y3_ = y2
-                self.dx3.append(self.x1_)
-                self.dy3.append(self.imgHeight - self.y3_)
-                self.x4_ = x2
-                self.y4_ = y2
-                self.dx4.append(self.imgWidth - self.x2_)
-                self.dy4.append(self.imgHeight - self.y3_)
+                self.dx1.append(x1)
+                self.dy1.append(y1)
+                self.dx2.append(self.imgWidth - x2)
+                self.dy2.append(y1)
+                self.dx3.append(x1)
+                self.dy3.append(self.imgHeight - y2)
+                self.dx4.append(self.imgWidth - x2)
+                self.dy4.append(self.imgHeight - y2)
                 self.stackImgArr.append(self.imgArr)
                 self.dx_dy['topLeft'] = [sum(self.dx1), sum(self.dy1)]
                 self.dx_dy['topRight'] = [self.refImgWidth - sum(self.dx2), sum(self.dy2)]
                 self.dx_dy['bottomLeft'] = [sum(self.dx3), self.refImgHeight - sum(self.dy3)]
                 self.dx_dy['bottomRight'] = [self.refImgWidth - sum(self.dx4), self.refImgHeight - sum(self.dy4)]
-                self.img['src'] = self.img['src'].crop((x1, y1, x2, y2))
+                self.img['src'] = self.img['src'].crop((int(x1), int(y1), int(x2), int(y2)))
                 self.imgWidth, self.imgHeight = self.img['src'].size
                 self.imgArr = mpimg.pil_to_array(self.img['src'])
                 self.imgArr.setflags(write=True)
@@ -517,14 +499,15 @@ class PlotCanvasImg(FigureCanvas):
                 self.imgArr = self.stackImgArr[-1]
                 self.img['src'] = Image.fromarray(self.imgArr)
                 self.stackImgArr = self.stackImgArr[:-1]
-                self.dx1 = self.dx1[:-1]
-                self.dx2 = self.dx2[:-1]
-                self.dx3 = self.dx3[:-1]
-                self.dx4 = self.dx4[:-1]
-                self.dy1 = self.dy1[:-1]
-                self.dy2 = self.dy2[:-1]
-                self.dy3 = self.dy3[:-1]
-                self.dy4 = self.dy4[:-1]
+                self.imgWidth, self.imgHeight = self.img['src'].size
+                del self.dx1[-1]
+                del self.dx2[-1]
+                del self.dx3[-1]
+                del self.dx4[-1]
+                del self.dy1[-1]
+                del self.dy2[-1]
+                del self.dy3[-1]
+                del self.dy4[-1]
                 self.profImshow()
                 self.draw()
 

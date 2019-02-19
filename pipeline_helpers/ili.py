@@ -15,7 +15,8 @@ import argparse
 from PIL import Image
 
 class State:
-    def __init__(self):
+    def __init__(self, config_file_path):
+        self.config_file = config_file_path
         self.dataUploaded = False
         self.history = []
         self.log_scale = True
@@ -42,8 +43,7 @@ class LoadFiles(QWidget):
         self.imgplt = mpimg.imread(imagepath)
 
         cellProfImgPath = celldist #'/home/renat/EMBL/spaceM_Luca/linux/testSamples/c2_SELECTED/Analysis/scAnalysis/Molecular_features/marks_flitered_fluo.npy'
-        self.cellProfImg = np.load(cellProfImgPath) if cellProfImgPath else ''
-        self.pmi = self.cellProfImg[0] if self.cellProfImg else []
+        self.pmi = np.load(cellProfImgPath)[1] if cellProfImgPath else []
 
         self.componentState.dataUploaded = True
         self.mols_list.update_mols_df(self.mol_names[0], self.mols_df)
@@ -275,8 +275,13 @@ class Tabs(QWidget):
 
     def export_configs(self):
         print(self.componentState.history)
-        with open("AM_analysis_config.txt", "w") as f:
-            f.write(json.dumps(self.componentState.history))
+        fn = self.componentState.config_file
+        with open(fn) as read_configs_json_file:
+            configs = json.load(read_configs_json_file)
+        configs['transforms'] = self.componentState.history
+        configs['MALDI_img_transformed'] = True
+        with open(fn, "w") as f:
+            json.dump(configs, f)
 
     @staticmethod
     def remove_double_int(history):
@@ -291,9 +296,9 @@ class Tabs(QWidget):
 
 class Window(QMainWindow):
 
-    def __init__(self, csv=None, img=None, celldist=None):
+    def __init__(self, csv=None, img=None, celldist=None, config_file_path=None):
         super().__init__()
-        self.state = State()
+        self.state = State(config_file_path)
         self.csv = csv
         self.img = img
         self.celldist = celldist
@@ -317,7 +322,12 @@ class Window(QMainWindow):
         self.navigation = NavigationToolbar(self.canvas, parent)
         self.tabs = Tabs(self.state, parent)
         self.mols = Mols_Section(self.state)
-        self.data = LoadFiles(self.state, self.canvas, self.mols, self.csv, self.img, self.celldist)
+        self.data = LoadFiles(self.state,
+                              self.canvas,
+                              self.mols,
+                              self.csv,
+                              self.img,
+                              self.celldist)
 
     @property
     def getWidgets(self):
@@ -328,6 +338,7 @@ class Window(QMainWindow):
             'mols': self.mols,
             'data': self.data
         }
+
 
 class Controller:
 
@@ -469,8 +480,10 @@ class MatplotlibArea(FigureCanvas):
         self.ax1.callbacks.connect('ylim_changed', self.on_ylims_change)
         if len(pmi) > 0 and pmi is not None:
             rf = int(pmi.shape[0] ** 0.5)
-            self.ax2.imshow(np.reshape(pmi, (rf, rf)))
-            self.ax3.imshow(np.reshape(list(arrZ), (rf, rf)), norm=self.norm)
+            im2 = self.ax2.imshow(np.reshape(pmi, (rf, rf)))
+            # plt.colorbar(im2 , ax=self.ax2)
+            im3 = self.ax3.imshow(np.reshape(list(arrZ), (rf, rf)), norm=self.norm)
+            # plt.colorbar(im3, ax=self.ax3)
         # self.ax2.axis('off')
         # self.ax3.axis('off')
 
@@ -524,14 +537,15 @@ if __name__ == '__main__':
     parser.add_argument('-csv', help='path to *.csv file with annotation detections')
     parser.add_argument('-img', help='path to binned 1x1 image')
     parser.add_argument('-celldist', help='Cell distribution *.npy file obtained after cell segmentation')
+    parser.add_argument('-configs', help='Settings file to which transformations will be saved', default='')
 
     args = parser.parse_args()
-    args.csv = '/home/renat/EMBL/Sharaz_images/rhodamin/Analysis/ili/sm_annotation_detections.csv'
-    args.img = '/home/renat/EMBL/Sharaz_images/rhodamin/Analysis/ili/FLUO_crop_bin1x1.png'
+    # args.csv = '/home/renat/EMBL/Sharaz_images/rhodamin/Analysis/ili/sm_annotation_detections.csv'
+    # args.img = '/home/renat/EMBL/Sharaz_images/rhodamin/Analysis/ili/FLUO_crop_bin1x1.png'
 
-    if args.csv and args.img:
+    if args.csv and args.img and args.celldist:
         app = QApplication(sys.argv)
-        main = Window(csv=args.csv, img=args.img)
+        main = Window(csv=args.csv, img=args.img, celldist=args.celldist, config_file_path=args.configs)
         sys.exit(app.exec_())
     elif args.csv is None:
         print('No path to csv file provided')

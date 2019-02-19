@@ -2,11 +2,11 @@ import sys
 from mainwindow_ui import Ui_MainWindow
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QRegExp, QThread
-from pipelinecontroller import *
+from pipelineController import *
 from global_vars import GlobalVars, global_vars
 import logging
 
-logging.basicConfig(filename='./spaceM.log',
+logging.basicConfig(filename='./logs/spaceM.log',
                             filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%H:%M:%S',
@@ -23,37 +23,46 @@ class NewThread(QThread):
         QThread.__init__(self)
 
     def run(self):
-        # find_am = FindAMinPM()
-        # find_am.step1()
-        # self.progressBarSig.emit(10)
-        # self.pipeStatusToLogger.emit('CropPMimage finished')
-        # self.pipeStatusToLogger.emit('Ablation mark finder started')
-        # find_am.step2()
-        #
-        # self.progressBarSig.emit(20)
-        # self.pipeStatusToLogger.emit('Cropping of AM finished')
-        # self.pipeStatusToLogger.emit('Ablation mark filtering started')
-        #
-        # filter_fiducials = FindFilterFiducials()
-        # self.pipeStatusToLogger.emit("Searching for fiducials started")
-        # filter_fiducials.step1()
-        # self.progressBarSig.emit(30)
-        # self.pipeStatusToLogger.emit("Searching for fiducials finished")
-        # self.pipeStatusToLogger.emit('Fiducials filtering on PRE maldi image started')
-        # filter_fiducials.step2()
-        # self.progressBarSig.emit(40)
-        # self.pipeStatusToLogger.emit('Fiducials filtering on PRE maldi image finished')
-        # reg_pre_post = RegisterPrePostMaldi()
-        # self.pipeStatusToLogger.emit('Registration of Pre and Post maldi fidicuals and metaspace based annotation started')
-        # reg_pre_post.step1()
-        # self.pipeStatusToLogger.emit('Registration of Pre and Post maldi fidicuals and metaspace based annotation finished')
-        # self.progressBarSig.emit(65)
+        find_am = FindAMinPM()
+        find_am.step1()
+        self.progressBarSig.emit(10)
+        self.pipeStatusToLogger.emit('CropPMimage finished')
+        self.pipeStatusToLogger.emit('Ablation mark finder started')
+        find_am.step2()
 
-        # cell_seg = CellSegment()
-        # cell_seg.step3()
+        self.progressBarSig.emit(20)
+        self.pipeStatusToLogger.emit('Cropping of AM finished')
+        self.pipeStatusToLogger.emit('Ablation mark filtering started')
 
-        gen_csv_features = GenerateCSV()
-        gen_csv_features.step1()
+        filter_fiducials = FindFilterFiducials()
+        self.pipeStatusToLogger.emit("Searching for fiducials started")
+        filter_fiducials.step1()
+        self.progressBarSig.emit(30)
+        self.pipeStatusToLogger.emit("Searching for fiducials finished")
+        self.pipeStatusToLogger.emit('Fiducials filtering on PRE maldi image started')
+        filter_fiducials.step2()
+        self.progressBarSig.emit(40)
+        self.pipeStatusToLogger.emit('Fiducials filtering on PRE maldi image finished')
+
+        reg_pre_post = RegisterPrePostMaldi()
+        self.pipeStatusToLogger.emit('Registration of Pre and Post maldi fidicuals and metaspace based annotation started')
+        reg_pre_post.step1()
+        self.pipeStatusToLogger.emit('Registration of Pre and Post maldi fidicuals and metaspace based annotation finished')
+        self.progressBarSig.emit(65)
+
+        cell_seg = CellSegment()
+        cell_seg.step0()
+        cell_seg.step1()
+        cell_seg.step2()
+        cell_seg.step3()
+        cell_seg.step4()
+        self.progressBarSig.emit(80)
+
+        # gen_csv_features = GenerateCSV()
+        # gen_csv_features.step1()
+        # gen_csv_features.step2()
+        # self.progressBarSig.emit(100)
+
 
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -68,16 +77,16 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.composite_img_path = ''
         self.fiji_path = ''
         self.cellprofiler_path = ''
+        # self.listWidget.itemClicked.connect(self.item_click)
 
     def run_pipe(self):
-        self.inp_path = self.widget.get_main_folder()
-        self.python_path = self.widget.lineEditPythonPath.text()
-        self.stitchedImgPreMPath = self.widget.get_stitched_img_prem_path()
-        self.stitchedImgPostMPath = self.widget.get_stitched_img_postm_path()
-        self.composite_img_path = self.widget.get_composite_img_path()
-        self.fiji_path = self.widget.get_fiji_path()
-        self.cellprofiler_path = self.widget.get_cellprofiler_path()
-        #
+        self.inp_path = self.widget2.get_main_folder()
+        self.python_path = self.widget2.lineEditPythonPath.text()
+        self.stitchedImgPreMPath = self.widget2.get_stitched_img_prem_path()
+        self.stitchedImgPostMPath = self.widget2.get_stitched_img_postm_path()
+        self.composite_img_path = self.widget2.get_composite_img_path()
+        self.cellprofiler_path = self.widget2.get_cellprofiler_path()
+
         # if self.inp_path and self.python_path and self.stitchedImgPreMPath and self.stitchedImgPostMPath \
         #         and self.composite_img_path and self.fiji_path:
         self.run_new_Thread.start()
@@ -94,19 +103,6 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         with open('./spaceM.log', 'r') as f:
             self.LogsTextBrowser.setText(f.read())
 
-    def run(self):
-        if global_vars.inp_path and global_vars.python_path and global_vars.stitchedImgPath:
-            cell_seg = CellSegment()
-            cell_seg.step1()
-            self.progressBar.setValue(68)
-            cell_seg.step2()
-            self.progressBar.setValue(75)
-            cell_seg.step3()
-            self.progressBar.setValue(80)
-
-            gen_csv = GenerateCSV()
-            gen_csv.step1()
-            self.progressBar.setValue(100)
 
 def main():
     app = QApplication(sys.argv)
