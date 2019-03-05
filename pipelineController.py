@@ -1,8 +1,6 @@
 import os
 import pipelineMethods, utils
 from subprocess import run, call
-from spaceM.unneeded_files.Pipeline import spatioMolecularMatrix, mapIntensitiesOnCells
-from spaceM.scAnalysis.Segmentation import cellDistribution_MALDI as cellDistrib
 from global_vars import global_vars
 
 SETTINGS = utils.prepare_settings()
@@ -116,7 +114,7 @@ class CellSegment(Analysis):
 
     def step2(self):
         print("Generation of cell distribution image started")
-        cellDistrib(self.MF, window=100)
+        pipelineMethods.cell_distrib(self.MF, window=100)
         print("Generation of cell distribution image finished")
 
     def step3(self):
@@ -142,7 +140,7 @@ class CellSegment(Analysis):
 
 class GenerateCSV(Analysis):
     def step1(self):
-        spatioMolecularMatrix(self.MF,
+        pipelineMethods.spatioMolecularMatrix(self.MF,
                               tf_obj=utils.ion2fluoTF,
                               udp_path=self.UDP_FILE,
                               ms_login=self.MS_LOGIN,
@@ -151,4 +149,4 @@ class GenerateCSV(Analysis):
                               fdr_level=self.FDR)
 
     def step2(self):
-        mapIntensitiesOnCells(self.MF, tf_obj=utils.ion2fluoTF)
+        pipelineMethods.mapIntensitiesOnCells(self.MF, tf_obj=utils.ion2fluoTF)

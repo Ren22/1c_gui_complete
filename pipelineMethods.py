@@ -1,8 +1,6 @@
-import os, json, gc
-import scipy.misc
-import spaceM
+import os, gc
 import utils
-
+import spaceM
 
 def ablation_mark_filter(MF, postMaldiImgPath, postMFluoOutputPath, postMFluoPath,
                          UDPpath, maldiMetadataPath, bf_img_p, marks_check=True, window=0):
@@ -46,21 +44,21 @@ def ablation_mark_filter(MF, postMaldiImgPath, postMFluoOutputPath, postMFluoPat
         #     maxsize=50e6)
 
     nbin = 1
-    predata = spaceM.WriteILIinput.preCSVdatagen(
+    predata = spaceM.Registration.WriteILIinput.preCSVdatagen(
         MF + 'Analysis/gridFit/xye_clean2.npy',
         radius=10,
         nbin=nbin,
         PlainFirst=True)
-    spaceM.WriteILIinput.writeCSV(
+    spaceM.Registration.WriteILIinput.writeCSV(
         path=MF + 'Analysis/gridFit/marks_check/ablation_marks_checkDETECTIONS.csv',
         data=predata)
 
-    predata = spaceM.WriteILIinput.preCSVdatagen(
+    predata = spaceM.Registration.WriteILIinput.preCSVdatagen(
         MF + 'Analysis/gridFit/xye_grid.npy',
         radius=10,
         nbin=nbin,
         PlainFirst=True)
-    spaceM.WriteILIinput.writeCSV(
+    spaceM.Registration.WriteILIinput.writeCSV(
         path=MF + 'Analysis/gridFit/marks_check/ablation_marks_checkTHEORETICAL.csv',
         data=predata)
 
@@ -118,76 +116,59 @@ def cell_segmentation(MF, pipeline_file):
     spaceM.scAnalysis.Segmentation.callCP(MF + 'Analysis/', pipeline_file, headless = headless)
 
 
+def cell_distrib(MF, window):
+    spaceM.scAnalysis.Segmentation.cellDistribution_MALDI(MF, window)
+
+
 def cell_outlines_gen(MF, cp_window):
     spaceM.scAnalysis.Segmentation.cellOutlines(MF + 'Analysis/CellProfilerAnalysis/Composite_cropped.tiff',
-                             cp_window,
-                             MF + 'Analysis/CellProfilerAnalysis/Labelled_cells.tiff',
-                             MF + 'Analysis/CellProfilerAnalysis/Contour_cells_adjusted.png')
+                                                       cp_window,
+                                                       MF + 'Analysis/CellProfilerAnalysis/Labelled_cells.tiff',
+                                                       MF + 'Analysis/CellProfilerAnalysis/Contour_cells_adjusted.png')
 
 
-def stitch_microscopy(MF,
-                     merge_filenames,
-                     tf,
-                     merge_colors=[],
-                     preMALDI=True,
-                     postMALDI=True):
+def spatioMolecularMatrix(MF,
+                          tf_obj,
+                          CDs=[0.75],
+                          fetch_ann='online',
+                          filter='correlation',
+                          tol_fact=-0.2,
+                          udp_path=None,
+                          ms_login=None,
+                          ms_password=None,
+                          ds_name=None,
+                          fdr_level=0.5):
 
-    """Function to stitch tile microscopy images into a single one. The function first applies a transformation (tf) on
-        each tile images prior to stitching. It also merges defined fields of stitched images together into an RGB .png
-        file.
-    Args:
-        MF (str): path to the Main Folder.
-        merge_colors (list): list of string of color names: 'red', 'green', 'blue', 'gray', 'cyan', 'magenta', 'yellow'.
-        merge_filenames (list): list of string of image files names to merge. Their sequence in the list should match their
-            respective color in the 'colors' argument. After stitching they should start with 'img_t1_z1_c ... '.
-        tf (fun): image transformation to apply to the tile images prior to stitching.
-        preMALDI (bool): whether or not stithcing preMALDI dataset.
-        postMALDI (bool): whether or not stithcing postMALDI dataset.
+    if not os.path.exists(MF + 'Analysis/scAnalysis/'):
+        os.makedirs(MF + 'Analysis/scAnalysis/')
 
-    Data are stored in MF + /Analysis/StitchedMicroscopy/
-    """
+    spaceM.scAnalysis.scAnalysis_refactored.defMOLfeatures(
+        MF,
+        tf_obj=tf_obj,
+        CDs=CDs,
+        norm_method='weighted_mean_sampling_area_MarkCell_overlap_ratio_sampling_area',
+        fetch_ann=fetch_ann, tol_fact=tol_fact, filter=filter,
+        fluo_path=MF + 'Analysis/CellProfilerAnalysis/rhodamine_cropped.tiff',
+        fluo_nucl_path=MF + 'Analysis/CellProfilerAnalysis/dapi_cropped.tiff',
+        ili_csv_file_path=MF + 'Analysis/ili/sm_annotation_detections.csv',
+        udp_path=udp_path,
+        ms_login=ms_login,
+        ms_password=ms_password,
+        ds_name=ds_name,
+        fdr_level=fdr_level)
 
-    if not os.path.exists(MF + 'Analysis/'):
-        os.makedirs(MF + 'Analysis/')
-        os.mkdir(MF + 'Analysis/StitchedMicroscopy/')
+    spaceM.scAnalysis.scAnalysis_refactored.mergeMORPHnMOL(
+        MF,
+        CDs=CDs,
+        fetch_ann=fetch_ann,
+        tol_fact=tol_fact,
+        filter=filter)
 
-    if preMALDI:
-
-        if not os.path.exists(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/'):
-            os.makedirs(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')
-
-        tif_files = spaceM.ImageFileManipulation.manipulations.PixFliplr(
-            tf,
-            MF + 'Input/Microscopy/preMALDI/',
-            MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')
-
-        spaceM.ImageFileManipulation.FIJIcalls.TileConfFormat(path= MF + 'Input/Microscopy/preMALDI/',
-                                                              dir_fliplr=MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
-                                                              tif_files= tif_files)
-        gc.collect()
-        spaceM.ImageFileManipulation.FIJIcalls.callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')
-        print('Pre-MALDI Stitching finished')
-
-    if postMALDI:
-
-        if not os.path.exists(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/'):
-            os.makedirs(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')
-
-        tif_files = spaceM.ImageFileManipulation.manipulations.PixFliplr(
-            tf,
-            MF + 'Input/Microscopy/postMALDI/',
-            MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')
-
-        spaceM.ImageFileManipulation.FIJIcalls.TileConfFormat(path=MF + 'Input/Microscopy/postMALDI/',
-                                                              dir_fliplr=MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/',
-                                                              tif_files=tif_files)
-        gc.collect()
-        spaceM.ImageFileManipulation.FIJIcalls.callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')
-        print('Post-MALDI Stitching finished')
-
-    if merge_colors != []:
-        spaceM.ImageFileManipulation.FIJIcalls.callFIJImergeChannels(
-            base_path=MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
-            colors=merge_colors,
-            filenames=merge_filenames,
-            save_filename='Composite.png')
+def mapIntensitiesOnCells(MF, tf_obj):
+    spaceM.scAnalysis.scAnalysis_refactored.mapAnn2microCells(
+        MF,
+        ds_index=None,
+        csv_p=MF + 'Analysis/scAnalysis/MORPHnMOL.csv',
+        labelled_cells_path=MF + 'Analysis/CellProfilerAnalysis/Labelled_cells.tiff',
+        tf_obj=tf_obj,
+        cp_window=0)
