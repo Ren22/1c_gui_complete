@@ -40,7 +40,7 @@ def TileConfFormat(path, dir_fliplr, tif_files):
                 if i <= np.shape(tif_files)[0]-1:
                     # print(row.strip().split('\t'))
                     data.append(row.strip().split('\t'))
-                    data[i][0] = str(i+1).zfill(n_zfill)
+                    data[i][0] = str(i).zfill(n_zfill)
                     data[i][1] = float(data[i][1].replace(',','.'))
                     data[i][2] = float(data[i][2].replace(',','.'))
                     out_file.write(base + '{}.tif; ; ({}, {})\n'.format(data[i][0],data[i][1],data[i][2]))
@@ -275,7 +275,8 @@ def stitchMicroscopy(MF,
 
 def tf(img):
     return img
+    # return np.fliplr(np.flipud(img))
 
 if __name__ == '__main__':
-    MF = '/home/renat/EMBL/Sharaz_images/rhodamin2/'
+    MF = '/home/renat/EMBL/vero/test/'
     stitchMicroscopy(MF, tf=tf, )

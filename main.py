@@ -3,7 +3,6 @@ from mainwindow_ui import Ui_MainWindow
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QRegExp, QThread
 from pipelineController import *
-from global_vars import GlobalVars, global_vars
 import logging
 
 logging.basicConfig(filename='./logs/spaceM.log',
@@ -58,10 +57,10 @@ class NewThread(QThread):
         cell_seg.step4()
         self.progressBarSig.emit(80)
 
-        # gen_csv_features = GenerateCSV()
-        # gen_csv_features.step1()
-        # gen_csv_features.step2()
-        # self.progressBarSig.emit(100)
+        gen_csv_features = GenerateCSV()
+        gen_csv_features.step1()
+        gen_csv_features.step2()
+        self.progressBarSig.emit(100)
 
 
 class SpaceMApp(QMainWindow, Ui_MainWindow):
@@ -72,44 +71,66 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.run_new_Thread = NewThread()
         self.inp_path = ''
         self.python_path = ''
-        self.stitchedImgPreMPath = ''
-        self.stitchedImgPostMPath = ''
-        self.composite_img_path = ''
-        self.fiji_path = ''
         self.cellprofiler_path = ''
-        # self.listWidget.itemClicked.connect(self.item_click)
+
+        self.stitchedPreMImage = ''
+        self.stitchedPostMImage = ''
+        self.stitPreMDapiImage = ''
+        self.stitPostMDapiImage = ''
+        self.stitPreMSampleImage = ''
+        self.compositeImg = ''
+        self.CPpipeFile = ''
+        self.udpFile = ''
+        self.imzMLName = ''
+        self.metadata = ''
+
+        self.MSLogin = ''
+        self.MSPass = ''
 
     def run_pipe(self):
-        self.inp_path = self.widget2.get_main_folder()
-        self.python_path = self.widget2.lineEditPythonPath.text()
-        self.stitchedImgPreMPath = self.widget2.get_stitched_img_prem_path()
-        self.stitchedImgPostMPath = self.widget2.get_stitched_img_postm_path()
-        self.composite_img_path = self.widget2.get_composite_img_path()
-        self.cellprofiler_path = self.widget2.get_cellprofiler_path()
+        self.inp_path = self.widget1.get_main_folder()
+        self.python_path = self.widget1.get_python()
+        self.cellprofiler_path = self.widget1.get_cellprofiler()
 
-        # if self.inp_path and self.python_path and self.stitchedImgPreMPath and self.stitchedImgPostMPath \
-        #         and self.composite_img_path and self.fiji_path:
-        self.run_new_Thread.start()
-        self.run_new_Thread.progressBarSig.connect(self.update_pb)
-        self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
-        # else:
-        #     QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and not empty")
+        self.stitchedPreMImage = self.widget1.get_stitchedPreMImage()
+        self.stitchedPostMImage = self.widget1.get_stitchedPostMImage()
+        self.stitPreMDapiImage = self.widget1.get_stitPreMDapiImage()
+        self.stitPostMDapiImage = self.widget1.get_stitPostMDapiImage()
+        self.stitPreMSampleImage = self.widget1.get_stitPreMSampleImage()
+        self.compositeImg = self.widget1.get_compositeImg()
+        self.CPpipeFile = self.widget1.get_CPpipeFile()
+        self.udpFile = self.widget1.get_udpFile()
+        self.imzMLName = self.widget1.get_imzMLName()
+        self.metadata = self.widget1.get_metadata()
+
+        self.MSLogin = self.widget1.get_MSLogin()
+        self.MSPass = self.widget1.get_MSPass()
+
+        if self.inp_path and self.python_path and self.stitchedPreMImage and \
+            self.stitchedPostMImage and self.stitPreMDapiImage and self.stitPostMDapiImage and self.stitPreMSampleImage \
+            and self.compositeImg and self.udpFile and self.imzMLName \
+                and self.metadata and self.MSLogin and self.MSPass:
+            self.run_new_Thread.start()
+            self.run_new_Thread.progressBarSig.connect(self.update_pb)
+            self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
+        else:
+            print(self.inp_path , self.python_path , self.cellprofiler_path , self.stitchedPreMImage , \
+            self.stitchedPostMImage , self.stitPreMDapiImage , self.stitPostMDapiImage , self.stitPreMSampleImage \
+            , self.compositeImg , self.udpFile , self.imzMLName \
+                , self.metadata , self.MSLogin , self.MSPass)
+            QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
 
     def update_pb(self, val):
         self.progressBar.setValue(val)
 
     def update_logger(self, val):
         logging.info(val)
-        with open('./spaceM.log', 'r') as f:
+        with open('./logs/spaceM.log', 'r') as f:
             self.LogsTextBrowser.setText(f.read())
 
 
-def main():
+if __name__ == '__main__':
     app = QApplication(sys.argv)
     form = SpaceMApp()
     form.show()
     app.exec()
-
-
-if __name__ == '__main__':
-    main()

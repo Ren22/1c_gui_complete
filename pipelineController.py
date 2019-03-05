@@ -1,7 +1,7 @@
-import os, logging
+import os
 import pipelineMethods, utils
 from subprocess import run, call
-from spaceM.Pipeline import spatioMolecularMatrix, mapIntensitiesOnCells
+from spaceM.unneeded_files.Pipeline import spatioMolecularMatrix, mapIntensitiesOnCells
 from spaceM.scAnalysis.Segmentation import cellDistribution_MALDI as cellDistrib
 from global_vars import global_vars
 
@@ -19,7 +19,7 @@ class Analysis():
         self.STITCHED_POST = global_vars.stitchedImgPostMPath
         self.PREM_DAPI = global_vars.preMaldiDapi
         self.POSTM_DAPI = global_vars.postMaldiDapi
-        self.PREM_FLUO = global_vars.preMaldiFluo
+        self.PREM_FLUO = global_vars.preMaldiSample
         self.COMPOSITE_PNG = global_vars.compositeImgPath
         self.CP_PIPELINE = global_vars.cpPipeLine
 
@@ -33,10 +33,10 @@ class Analysis():
         self.FDR = global_vars.fdr
 
         self.MFA = self.MF + 'Analysis/'
-        self.AM_CURATOR = './MaldiHelper.py'
+        self.AM_CURATOR = './pipeline_helpers/MaldiHelper.py'
         self.SPOT_FINDER = self.MFA + 'SpotFinder/'
         self.GRIDFIT = self.MFA + 'gridFit/'
-        self.ILI = '/home/renat/EMBL/spaceM_Luca/linux/1c_gui_complete/ili.py'
+        self.ILI = './pipeline_helpers/ili.py'
 
 
 class FindAMinPM(Analysis):
@@ -142,7 +142,13 @@ class CellSegment(Analysis):
 
 class GenerateCSV(Analysis):
     def step1(self):
-        spatioMolecularMatrix(self.MF, tf_obj=utils.ion2fluoTF)
+        spatioMolecularMatrix(self.MF,
+                              tf_obj=utils.ion2fluoTF,
+                              udp_path=self.UDP_FILE,
+                              ms_login=self.MS_LOGIN,
+                              ms_password=self.MS_PASS,
+                              ds_name=self.IMZML_FILENAME,
+                              fdr_level=self.FDR)
 
     def step2(self):
         mapIntensitiesOnCells(self.MF, tf_obj=utils.ion2fluoTF)

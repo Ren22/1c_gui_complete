@@ -1,4 +1,4 @@
-from gen_settings_ui import Ui_gen_settings
+from .gen_settings_ui import Ui_gen_settings
 from PyQt5.QtWidgets import *
 from global_vars import global_vars
 

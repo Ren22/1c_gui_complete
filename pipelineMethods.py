@@ -65,7 +65,9 @@ def ablation_mark_filter(MF, postMaldiImgPath, postMFluoOutputPath, postMFluoPat
         data=predata)
 
     if not os.path.exists(MF + 'Analysis/gridFit/marksMask.npy'):
-        spaceM.Registration.AblationMarkFinder.regionGrowingAblationMarks(MF, maxDist=17, window=window)
+        # Provide maxDist=17 for the rho 2 exp
+        # spaceM.Registration.AblationMarkFinder.regionGrowingAblationMarks(MF, window=window, maxDist=17)
+        spaceM.Registration.AblationMarkFinder.regionGrowingAblationMarks(MF, window=window)
         spaceM.Registration.AblationMarkFinder.AM_filter(MF, window=window)
 
 
@@ -84,7 +86,7 @@ def fiducials_finder(MF, preMaldiImg, postMaldiImg):
     spaceM.Registration.ImageRegistration.penMarksFeatures(MF, stitchedImg=postMaldiImg, prefix='post')
 
 
-def registration(MF, tf_obj, do_transform=True, do_ili=True, ili_fdr=0.5,
+def registration(MF, tf_obj, do_transform=True, do_ili=True, ili_fdr=0.2,
     ds_name = None, db_name = None, email = None, password = None):
     if not os.path.exists(MF + 'Analysis/Fiducials/optimized_params.npy'):
         spaceM.Registration.ImageRegistration.fiducialsAlignment(MF + 'Analysis/')
