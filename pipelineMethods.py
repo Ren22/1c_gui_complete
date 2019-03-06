@@ -96,7 +96,7 @@ def registration(MF, tf_obj, do_transform=True, do_ili=True, ili_fdr=0.2,
         if not os.path.exists(MF + 'Analysis/ili/'):
             os.makedirs(MF + 'Analysis/ili/')
 
-    spaceM.WriteILIinput.annotationSM2CSV(
+    spaceM.Registration.WriteILIinput.annotationSM2CSV(
         MFA=MF + 'Analysis/',
         fdr=ili_fdr,
         nbin=1,

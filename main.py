@@ -5,6 +5,11 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRegExp, QThread
 from pipelineController import *
 import logging
 
+if not os.path.exists('./logs'):
+    os.makedirs('./logs')
+if not os.path.exists('./configs/spaceM.log'):
+    with open('./configs/spaceM.log', 'w') as log_file:
+        log_file.write('')
 logging.basicConfig(filename='./logs/spaceM.log',
                             filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
@@ -119,6 +124,11 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             , self.compositeImg , self.udpFile , self.imzMLName \
                 , self.metadata , self.MSLogin , self.MSPass)
             QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
+
+    # #     TODO: DEV only - bypassing all checks
+    #     self.run_new_Thread.start()
+    #     self.run_new_Thread.progressBarSig.connect(self.update_pb)
+    #     self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
 
     def update_pb(self, val):
         self.progressBar.setValue(val)

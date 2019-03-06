@@ -2,6 +2,7 @@ import os
 import pipelineMethods, utils
 from subprocess import run, call
 from global_vars import global_vars
+from pipeline_helpers import MaldiHelper, ili
 
 SETTINGS = utils.prepare_settings()
 
@@ -31,10 +32,10 @@ class Analysis():
         self.FDR = global_vars.fdr
 
         self.MFA = self.MF + 'Analysis/'
-        self.AM_CURATOR = './pipeline_helpers/MaldiHelper.py'
+        self.AM_CURATOR = MaldiHelper.__file__
         self.SPOT_FINDER = self.MFA + 'SpotFinder/'
         self.GRIDFIT = self.MFA + 'gridFit/'
-        self.ILI = './pipeline_helpers/ili.py'
+        self.ILI = ili.__file__
 
 
 class FindAMinPM(Analysis):
