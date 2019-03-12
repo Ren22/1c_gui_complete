@@ -141,7 +141,7 @@ class CellSegment(Analysis):
 
 class GenerateCSV(Analysis):
     def step1(self):
-        pipelineMethods.spatioMolecularMatrix(self.MF,
+        pipelineMethods.spatio_molecular_matrix(self.MF,
                               tf_obj=utils.ion2fluoTF,
                               udp_path=self.UDP_FILE,
                               ms_login=self.MS_LOGIN,
@@ -150,4 +150,4 @@ class GenerateCSV(Analysis):
                               fdr_level=self.FDR)
 
     def step2(self):
-        pipelineMethods.mapIntensitiesOnCells(self.MF, tf_obj=utils.ion2fluoTF)
+        pipelineMethods.map_intensities_on_cells(self.MF, tf_obj=utils.ion2fluoTF)

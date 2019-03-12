@@ -119,10 +119,10 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             self.run_new_Thread.progressBarSig.connect(self.update_pb)
             self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
         else:
-            print(self.inp_path , self.python_path , self.cellprofiler_path , self.stitchedPreMImage , \
-            self.stitchedPostMImage , self.stitPreMDapiImage , self.stitPostMDapiImage , self.stitPreMSampleImage \
-            , self.compositeImg , self.udpFile , self.imzMLName \
-                , self.metadata , self.MSLogin , self.MSPass)
+            print(self.inp_path, self.python_path, self.cellprofiler_path, self.stitchedPreMImage, \
+            self.stitchedPostMImage , self.stitPreMDapiImage , self.stitPostMDapiImage , self.stitPreMSampleImage, \
+            self.compositeImg, self.udpFile, self.imzMLName, \
+            self.metadata, self.MSLogin, self.MSPass)
             QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
 
     # #     TODO: DEV only - bypassing all checks

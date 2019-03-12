@@ -127,7 +127,7 @@ def cell_outlines_gen(MF, cp_window):
                                                        MF + 'Analysis/CellProfilerAnalysis/Contour_cells_adjusted.png')
 
 
-def spatioMolecularMatrix(MF,
+def spatio_molecular_matrix(MF,
                           tf_obj,
                           CDs=[0.75],
                           fetch_ann='online',
@@ -164,7 +164,8 @@ def spatioMolecularMatrix(MF,
         tol_fact=tol_fact,
         filter=filter)
 
-def mapIntensitiesOnCells(MF, tf_obj):
+
+def map_intensities_on_cells(MF, tf_obj):
     spaceM.scAnalysis.scAnalysis_refactored.mapAnn2microCells(
         MF,
         ds_index=None,

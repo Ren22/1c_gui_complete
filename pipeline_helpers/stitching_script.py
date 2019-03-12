@@ -4,8 +4,26 @@ import numpy as np
 from subprocess import call
 
 fiji_path = '/home/renat/EMBL/software/Fiji.app/ImageJ-linux64'
+MF = '/home/renat/EMBL/vero/test2/'
+metadata_path = '/home/renat/EMBL/vero/test2/Input/Microscopy/preMALDI/Well2.txt'
 
-def TileConfFormat(path, dir_fliplr, tif_files):
+
+def getPixSize(metadata_path):
+    """Reads the pixel size in um from the Nikon Ti E microscope (NIS elements software).
+
+    Returns:
+        pix_size (float): pixel size in um.
+
+    """
+    pix_size = 0.73
+    txt_file = codecs.open(metadata_path, 'r', 'utf-16')
+    for row in txt_file:
+        if row.startswith('Calibration'):
+            pix_size = float(row.strip().split()[2].replace(',', '.'))
+    return pix_size
+
+
+def TileConfFormat(path, dir_fliplr, tif_files, pix_size):
     """Extract the microscope motor stage coordinates at each frame from the metadata text file from the Nikon
     Ti-E microscope (NIS elements software) and reformat into readable format for the Priebisch software algorithm
     from FIJI.
@@ -16,8 +34,8 @@ def TileConfFormat(path, dir_fliplr, tif_files):
         tif_files (array): names of each tiled frames to stitch.
 
     """
-    if 'out.txt' in os.listdir(path):
-        txt_file = codecs.open(path + 'out.txt', 'r', 'utf-16')
+    if os.path.basename(metadata_path) in os.listdir(path):
+        txt_file = codecs.open(path + os.path.basename(metadata_path), 'r', 'utf-16')
         data = []
         out_file = open(dir_fliplr + 'TileConfiguration.txt', 'w')
         out_file.write('# Define the number of dimensions we are working on\ndim = 2\n\n# Define the image coordinates\n')
@@ -41,8 +59,8 @@ def TileConfFormat(path, dir_fliplr, tif_files):
                     # print(row.strip().split('\t'))
                     data.append(row.strip().split('\t'))
                     data[i][0] = str(i).zfill(n_zfill)
-                    data[i][1] = float(data[i][1].replace(',','.'))
-                    data[i][2] = float(data[i][2].replace(',','.'))
+                    data[i][1] = float(data[i][1].replace(',', '.')) / pix_size
+                    data[i][2] = float(data[i][2].replace(',', '.')) / pix_size
                     out_file.write(base + '{}.tif; ; ({}, {})\n'.format(data[i][0],data[i][1],data[i][2]))
                     # re.findall('^(.*)(\d{3})$', 'seq000_XY120')
                     # print i
@@ -210,7 +228,7 @@ def stitchMicroscopy(MF,
                      tf,
                      merge_filenames=[],
                      merge_colors=[],
-                     preMALDI=False,
+                     preMALDI=True,
                      postMALDI=True):
 
     """Function to stitch tile microscopy images into a single one. The function first applies a transformation (tf) on
@@ -242,9 +260,11 @@ def stitchMicroscopy(MF,
             MF + 'Input/Microscopy/preMALDI/',
             MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')
 
+        pix_size = getPixSize(metadata_path=metadata_path)
+
         TileConfFormat(path= MF + 'Input/Microscopy/preMALDI/',
                                                               dir_fliplr=MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
-                                                              tif_files= tif_files)
+                                                              tif_files= tif_files, pix_size=pix_size)
         gc.collect()
         callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')
         print('Pre-MALDI Stitching finished')
@@ -259,9 +279,11 @@ def stitchMicroscopy(MF,
             MF + 'Input/Microscopy/postMALDI/',
             MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')
 
+        pix_size = getPixSize(metadata_path=metadata_path)
+
         TileConfFormat(path=MF + 'Input/Microscopy/postMALDI/',
                                                               dir_fliplr=MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/',
-                                                              tif_files=tif_files)
+                                                              tif_files=tif_files, pix_size=pix_size)
         gc.collect()
         callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')
         print('Post-MALDI Stitching finished')
@@ -274,9 +296,8 @@ def stitchMicroscopy(MF,
             save_filename='Composite.png')
 
 def tf(img):
-    return img
-    # return np.fliplr(np.flipud(img))
+    # return img
+    return np.fliplr(np.flipud(img))
 
 if __name__ == '__main__':
-    MF = '/home/renat/EMBL/vero/test/'
     stitchMicroscopy(MF, tf=tf, )
