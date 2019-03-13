@@ -2,9 +2,10 @@ import os
 import pipelineMethods, utils
 from subprocess import run, call
 from global_vars import global_vars
-from pipeline_helpers import MaldiHelper, ili
+from pipeline_helpers import abl_mark_handler, ili_analog
 
 SETTINGS = utils.prepare_settings()
+
 
 class Analysis():
     def __init__(self):
@@ -32,10 +33,10 @@ class Analysis():
         self.FDR = global_vars.fdr
 
         self.MFA = self.MF + 'Analysis/'
-        self.AM_CURATOR = MaldiHelper.__file__
+        self.AM_CURATOR = abl_mark_handler.__file__
         self.SPOT_FINDER = self.MFA + 'SpotFinder/'
         self.GRIDFIT = self.MFA + 'gridFit/'
-        self.ILI = ili.__file__
+        self.ILI = ili_analog.__file__
 
 
 class FindAMinPM(Analysis):
@@ -128,7 +129,7 @@ class CellSegment(Analysis):
         csv = self.MFA + 'ili/sm_annotation_detections.csv'
         img = self.MFA + 'CellProfilerAnalysis/Composite_cropped.tiff'
         celldist = self.MFA + 'CellProfilerAnalysis/cellDistribution_MALDI.npy'
-        configs = './configs/configs.json'
+        configs = './configs/transforms.json'
         execut_string = '{} {} -csv {} -img {} -celldist {} -configs {}'.format(self.PYTHON_PATH,
                                                                                 self.ILI,
                                                                                 csv,

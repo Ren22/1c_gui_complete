@@ -5,20 +5,20 @@ import scipy
 import os, json
 from PIL import Image
 
-CONFIGS = './configs/configs.json'
+CONFIGS = './configs/transforms.json'
 
 
 def prepare_settings():
     if not os.path.exists('./configs'):
         os.makedirs('./configs')
-    if not os.path.exists('./configs/configs.json'):
+    if not os.path.exists('./configs/transforms.json'):
         configs = {'transforms': [],
                    'MALDI_img_transformed': False}
-        with open('./configs/configs.json', 'w') as json_file:
+        with open('./configs/transforms.json', 'w') as json_file:
             json.dump(configs, json_file)
     else:
         # TODO: add an option of running the existing pipeline configs
-        with open('./configs/configs.json') as f:
+        with open('./configs/transforms.json') as f:
             configs = json.load(f)
     return configs
 
