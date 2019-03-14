@@ -130,6 +130,7 @@ class Gen_Settings(QWidget, Ui_gen_settings):
 
     '''Setters for paths'''
     def set_main_folder(self, path):
+        self.lineEditMainFolder.setText(path)
         global_vars.set_inp_path(path)
 
     def set_python(self, path):

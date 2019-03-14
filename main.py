@@ -1,9 +1,11 @@
-import sys
+import sys, json
 from mainwindow_ui import Ui_MainWindow
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QRegExp, QThread
 from pipelineController import *
 import logging
+from gen_settings.gen_settings import Gen_Settings as GS
+from gen_settings.gen_settings_ui import Ui_gen_settings
 
 if not os.path.exists('./logs'):
     os.makedirs('./logs')
@@ -68,11 +70,23 @@ class NewThread(QThread):
         self.progressBarSig.emit(100)
 
 
-class SpaceMApp(QMainWindow, Ui_MainWindow):
+class CallBacks(GS):
+    def import_settings(self):
+        print('here')
+        if os.path.exists('./configs/settings.json'):
+            with open('./configs/settings.json') as f:
+                settings = json.load(f)
+                # print(settings['inp_path'])
+                self.lineEditMainFolder.setText(settings['inp_path'])
+                self.lineEditMainFolder.repaint()
+                # GS.set_main_folder(settings['inp_path'])
+
+
+class SpaceMApp(QMainWindow, Ui_MainWindow, Ui_gen_settings):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
         self.setupUi(self)
-        self.btnStartAnalysis.clicked.connect(self.run_pipe)
+        self.connect_callbacks()
         self.run_new_Thread = NewThread()
         self.inp_path = ''
         self.python_path = ''
@@ -91,6 +105,11 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
 
         self.MSLogin = ''
         self.MSPass = ''
+
+    def connect_callbacks(self):
+        cb = CallBacks()
+        self.btnStartAnalysis.clicked.connect(self.run_pipe)
+        self.btnImprtSettings.clicked.connect(cb.import_settings)
 
     def run_pipe(self):
         self.inp_path = self.widget1.get_main_folder()
@@ -125,10 +144,13 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             self.metadata, self.MSLogin, self.MSPass)
             QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
 
+
     # #     TODO: DEV only - bypassing all checks
     #     self.run_new_Thread.start()
     #     self.run_new_Thread.progressBarSig.connect(self.update_pb)
     #     self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
+
+
 
     def update_pb(self, val):
         self.progressBar.setValue(val)
