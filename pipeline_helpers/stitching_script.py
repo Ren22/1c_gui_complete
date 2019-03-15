@@ -3,15 +3,17 @@ import tifffile as tiff
 import numpy as np
 from subprocess import call
 
-
 def getMetadataPath(folderToSearch):
-    for row in os.listdir(folderToSearch):
-        if row.endswith('.txt'):
-            with codecs.open(MF + 'Input/Microscopy/preMALDI/' + row, 'r', 'utf-16') as txt_file:
-                data = txt_file.readlines()
-                if len(re.findall('Image Fields', data[0])) > 0:
-                    return MF + 'Input/Microscopy/preMALDI/' + row
-    raise Exception('Metadata file was not found')
+    if len(os.listdir(folderToSearch)) > 0:
+        for row in os.listdir(folderToSearch):
+            if row.endswith('.txt'):
+                with codecs.open(folderToSearch + row, 'r', 'utf-16') as txt_file:
+                    data = txt_file.readlines()
+                    if len(re.findall('Image Fields', data[0])) > 0:
+                        return folderToSearch + row
+    else:
+        return 0
+    raise Exception('Metadata file was not found at {}'.format(folderToSearch))
 
 
 def getPixSize(MF, metadata_path):
@@ -24,7 +26,6 @@ def getPixSize(MF, metadata_path):
     for row in os.listdir(MF + 'Input/Microscopy/preMALDI/'):
         if row.endswith('.txt'):
             os.path.basename(row)
-            print(row)
             with codecs.open(MF + 'Input/Microscopy/preMALDI/' + row, 'r', 'utf-16') as txt_file:
                 data = txt_file.readlines()
                 if len(re.findall('Image Fields', data[0])) > 0:
@@ -279,17 +280,19 @@ def stitchMicroscopy(MF,
             MF + 'Input/Microscopy/preMALDI/',
             MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')
 
-        metadata_path = getMetadataPath(MF + 'Input/Microscopy/preMALDI/')
+        if len(tif_files) > 0:
 
-        pix_size = getPixSize(MF, metadata_path)
+            metadata_path = getMetadataPath(MF + 'Input/Microscopy/preMALDI/')
 
-        TileConfFormat(path= MF + 'Input/Microscopy/preMALDI/',
-                       dir_fliplr=MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
-                       tif_files= tif_files,
-                       pix_size=pix_size,
-                       metadata_path=metadata_path)
-        gc.collect()
-        callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/', fiji_path)
+            pix_size = getPixSize(MF, metadata_path)
+
+            TileConfFormat(path= MF + 'Input/Microscopy/preMALDI/',
+                           dir_fliplr=MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
+                           tif_files= tif_files,
+                           pix_size=pix_size,
+                           metadata_path=metadata_path)
+            gc.collect()
+            callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/', fiji_path)
         print('Pre-MALDI Stitching finished')
 
     if postMALDI:
@@ -302,17 +305,19 @@ def stitchMicroscopy(MF,
             MF + 'Input/Microscopy/postMALDI/',
             MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')
 
-        metadata_path = getMetadataPath(MF + 'Input/Microscopy/postMALDI/')
+        if len(tif_files) > 0:
 
-        pix_size = getPixSize(MF, metadata_path)
+            metadata_path = getMetadataPath(MF + 'Input/Microscopy/postMALDI/')
 
-        TileConfFormat(path=MF + 'Input/Microscopy/postMALDI/',
-                       dir_fliplr=MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/',
-                       tif_files=tif_files,
-                       pix_size=pix_size,
-                       metadata_path=metadata_path)
-        gc.collect()
-        callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/', fiji_path)
+            pix_size = getPixSize(MF, metadata_path)
+
+            TileConfFormat(path=MF + 'Input/Microscopy/postMALDI/',
+                           dir_fliplr=MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/',
+                           tif_files=tif_files,
+                           pix_size=pix_size,
+                           metadata_path=metadata_path)
+            gc.collect()
+            callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/', fiji_path)
         print('Post-MALDI Stitching finished')
 
     if merge_colors != []:
