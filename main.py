@@ -4,8 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal, QRegExp, QThread
 from pipelineController import *
 import logging
-from gen_settings.gen_settings import Gen_Settings as GS
-from gen_settings.gen_settings_ui import Ui_gen_settings
+from gen_settings.gensettings import GenSettings as gs
 
 if not os.path.exists('./logs'):
     os.makedirs('./logs')
@@ -70,70 +69,67 @@ class NewThread(QThread):
         self.progressBarSig.emit(100)
 
 
-class CallBacks(GS):
-    def import_settings(self):
-        print('here')
-        if os.path.exists('./configs/settings.json'):
-            with open('./configs/settings.json') as f:
-                settings = json.load(f)
-                # print(settings['inp_path'])
-                self.lineEditMainFolder.setText(settings['inp_path'])
-                self.lineEditMainFolder.repaint()
-                # GS.set_main_folder(settings['inp_path'])
-
-
-class SpaceMApp(QMainWindow, Ui_MainWindow, Ui_gen_settings):
+class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
         self.setupUi(self)
+        gs(self)
         self.connect_callbacks()
         self.run_new_Thread = NewThread()
-        self.inp_path = ''
-        self.python_path = ''
-        self.cellprofiler_path = ''
-
-        self.stitchedPreMImage = ''
-        self.stitchedPostMImage = ''
-        self.stitPreMDapiImage = ''
-        self.stitPostMDapiImage = ''
-        self.stitPreMSampleImage = ''
-        self.compositeImg = ''
-        self.CPpipeFile = ''
-        self.udpFile = ''
-        self.imzMLName = ''
-        self.metadata = ''
-
-        self.MSLogin = ''
-        self.MSPass = ''
 
     def connect_callbacks(self):
-        cb = CallBacks()
         self.btnStartAnalysis.clicked.connect(self.run_pipe)
-        self.btnImprtSettings.clicked.connect(cb.import_settings)
+        self.btnImprtSettings.clicked.connect(self.import_settings)
+
+    def import_settings(self):
+        if os.path.exists('./configs/settings.json'):
+            with open('./configs/settings.json') as f:
+                settings = json.load(f)
+                self.lineEditMainFolder.setText(settings['inp_path'])
+                self.lineEditPythonPath.setText(settings['python_path'])
+                self.lineEditCellProfiler.setText(settings['cellprofilerPath'])
+
+                self.lineEditStitchedPreMImage.setText(settings['stitchedImgPreMPath'])
+                self.lineEditStitchedPostMImage.setText(settings['stitchedImgPostMPath'])
+                self.lineEditStitPreMDapiImage.setText(settings['preMaldiDapi'])
+                self.lineEditStitPostMDapiImage.setText(settings['postMaldiDapi'])
+                self.lineEditStitPreMSampleImage.setText(settings['preMaldiSample'])
+                self.lineEditCompositeImg.setText(settings['compositeImgPath'])
+                self.lineEditCPpipeFile.setText(settings['cpPipeLine'])
+
+                self.lineEditUdpFile.setText(settings['udpFile'])
+                self.lineEditimzMLName.setText(settings['imzMLName'])
+                self.lineEditMetadata.setText(settings['maldiMetadata'])
+
+                self.lineEditMSLogin.setText(settings['MSLogin'])
+                self.lineEditMSPass.setText(settings['MSPass'])
+        else:
+            QMessageBox.warning(self, "Warning", "No settings file found!")
+            Exception('Settings file was not found or does not exist')
 
     def run_pipe(self):
-        self.inp_path = self.widget1.get_main_folder()
-        self.python_path = self.widget1.get_python()
-        self.cellprofiler_path = self.widget1.get_cellprofiler()
+        self.inp_path = gs.get_main_folder(self)
+        self.python_path = gs.get_python(self)
+        self.cellprofiler_path = gs.get_cellprofiler(self)
 
-        self.stitchedPreMImage = self.widget1.get_stitchedPreMImage()
-        self.stitchedPostMImage = self.widget1.get_stitchedPostMImage()
-        self.stitPreMDapiImage = self.widget1.get_stitPreMDapiImage()
-        self.stitPostMDapiImage = self.widget1.get_stitPostMDapiImage()
-        self.stitPreMSampleImage = self.widget1.get_stitPreMSampleImage()
-        self.compositeImg = self.widget1.get_compositeImg()
-        self.CPpipeFile = self.widget1.get_CPpipeFile()
-        self.udpFile = self.widget1.get_udpFile()
-        self.imzMLName = self.widget1.get_imzMLName()
-        self.metadata = self.widget1.get_metadata()
+        self.stitchedPreMImage = gs.get_stitchedPreMImage(self)
+        self.stitchedPostMImage = gs.get_stitchedPostMImage(self)
+        self.stitPreMDapiImage = gs.get_stitPreMDapiImage(self)
+        self.stitPostMDapiImage = gs.get_stitPostMDapiImage(self)
+        self.stitPreMSampleImage = gs.get_stitPreMSampleImage(self)
+        self.compositeImg = gs.get_compositeImg(self)
+        self.CPpipeFile = gs.get_CPpipeFile(self)
+        self.udpFile = gs.get_udpFile(self)
+        self.imzMLName = gs.get_imzMLName(self)
+        self.metadata = gs.get_metadata(self)
 
-        self.MSLogin = self.widget1.get_MSLogin()
-        self.MSPass = self.widget1.get_MSPass()
+        self.MSLogin = gs.get_MSLogin(self)
+        self.MSPass = gs.get_MSPass(self)
 
         if self.inp_path and self.python_path and self.stitchedPreMImage and \
             self.stitchedPostMImage and self.stitPreMDapiImage and self.stitPostMDapiImage and self.stitPreMSampleImage \
             and self.compositeImg and self.udpFile and self.imzMLName \
-                and self.metadata and self.MSLogin and self.MSPass:
+                and self.metadata :
             self.run_new_Thread.start()
             self.run_new_Thread.progressBarSig.connect(self.update_pb)
             self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
@@ -141,16 +137,13 @@ class SpaceMApp(QMainWindow, Ui_MainWindow, Ui_gen_settings):
             print(self.inp_path, self.python_path, self.cellprofiler_path, self.stitchedPreMImage, \
             self.stitchedPostMImage , self.stitPreMDapiImage , self.stitPostMDapiImage , self.stitPreMSampleImage, \
             self.compositeImg, self.udpFile, self.imzMLName, \
-            self.metadata, self.MSLogin, self.MSPass)
+            self.metadata)
             QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
 
-
-    # #     TODO: DEV only - bypassing all checks
+    #     TODO: DEV only - bypassing all checks
     #     self.run_new_Thread.start()
     #     self.run_new_Thread.progressBarSig.connect(self.update_pb)
     #     self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
-
-
 
     def update_pb(self, val):
         self.progressBar.setValue(val)
