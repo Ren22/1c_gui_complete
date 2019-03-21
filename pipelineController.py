@@ -9,7 +9,9 @@ SETTINGS = utils.prepare_settings()
 
 class Analysis():
     def __init__(self):
-        super(Analysis, self).__init__()
+        self.get_paths()
+
+    def get_paths(self):
         ''' GUI paths'''
         self.MF = global_vars.inp_path + '/'
         self.PYTHON_PATH = global_vars.python_path
@@ -39,99 +41,122 @@ class Analysis():
         self.ILI = ili_analog.__file__
 
 
-class FindAMinPM(Analysis):
+class FindAMinPM():
     def __init__(self):
-        super(FindAMinPM, self).__init__()
+        self.vars = Analysis()
 
     def step1(self):
+        self.vars.get_paths()
         print('cropPMimage started')
-        if not os.path.exists(self.GRIDFIT):
-            os.makedirs(self.GRIDFIT)
-        run(["{}".format(self.PYTHON_PATH), "{}".format(self.AM_CURATOR), "{}".format(self.STITCHED_POST),
-             "{}AM_cropped.tif".format(self.GRIDFIT)])
+        if not os.path.exists(self.vars.GRIDFIT):
+            os.makedirs(self.vars.GRIDFIT)
+        run(["{}".format(self.vars.PYTHON_PATH), "{}".format(self.vars.AM_CURATOR), "{}".format(self.vars.STITCHED_POST),
+             "{}AM_cropped.tif".format(self.vars.GRIDFIT)])
         print('cropPMimage finished')
 
     def step2(self):
-        if not os.path.exists(self.GRIDFIT):
-            os.makedirs(self.GRIDFIT)
+        self.vars.get_paths()
+        if not os.path.exists(self.vars.GRIDFIT):
+            os.makedirs(self.vars.GRIDFIT)
         print('Ablation mark finding and filtering started')
-        pipelineMethods.ablation_mark_filter(self.MF, self.STITCHED_POST, self.GRIDFIT,
-                                             self.POSTM_DAPI, self.UDP_FILE,
-                                             self.MALDI_METADATA, "{}AM_cropped.tif".format(self.GRIDFIT), window=0)
+        pipelineMethods.ablation_mark_filter(self.vars.MF, self.vars.STITCHED_POST, self.vars.GRIDFIT,
+                                             self.vars.POSTM_DAPI, self.vars.UDP_FILE,
+                                             self.vars.MALDI_METADATA, "{}AM_cropped.tif".format(self.vars.GRIDFIT),
+                                             window=0)
         print('Ablation mark finding and filtering finished')
 
 
-class FindFilterFiducials(Analysis):
+class FindFilterFiducials():
     def __init__(self):
-        super(FindFilterFiducials, self).__init__()
+        self.vars = Analysis()
 
     def step1(self):
+        self.vars.get_paths()
         print("Searching for fiducials started")
-        pipelineMethods.fiducials_finder(self.MF, self.STITCHED_PRE, self.STITCHED_POST)
+        pipelineMethods.fiducials_finder(self.vars.MF, self.vars.STITCHED_PRE, self.vars.STITCHED_POST)
         print("Searching for fiducials finished")
 
     def step2(self):
+        self.vars.get_paths()
         print('Fiducials filtering on PRE maldi image started')
-        run(["{}".format(self.PYTHON_PATH), "{}".format(self.AM_CURATOR),
-             "{}".format(self.MFA + 'Fiducials/preXYpenmarks.npy'),
-             "{}".format(self.MFA + 'Fiducials/preXYpenmarks.npy')])
+        run(["{}".format(self.vars.PYTHON_PATH), "{}".format(self.vars.AM_CURATOR),
+             "{}".format(self.vars.MFA + 'Fiducials/preXYpenmarks.npy'),
+             "{}".format(self.vars.MFA + 'Fiducials/preXYpenmarks.npy')])
         print('Fiducials filtering on PRE maldi image finished')
         print('Fiducials filtering on POST maldi image started')
-        run(["{}".format(self.PYTHON_PATH), "{}".format(self.AM_CURATOR),
-             "{}".format(self.MFA + 'Fiducials/postXYpenmarks.npy'),
-             "{}".format(self.MFA + 'Fiducials/postXYpenmarks.npy')])
+        run(["{}".format(self.vars.PYTHON_PATH), "{}".format(self.vars.AM_CURATOR),
+             "{}".format(self.vars.MFA + 'Fiducials/postXYpenmarks.npy'),
+             "{}".format(self.vars.MFA + 'Fiducials/postXYpenmarks.npy')])
         print('Fiducials filtering on POST maldi image finished')
 
 
-class RegisterPrePostMaldi(Analysis):
+class RegisterPrePostMaldi():
+    def __init__(self):
+        self.vars = Analysis()
+
     def step1(self):
+        self.vars.get_paths()
         # For this step access to internet and Metaspace is needed
         # The metaspace package is used to pull ion images
         # Check if the package is not updated -> update it
         print("Registration of Pre and Post maldi fidicuals, alignment, and metaspace based annotation started")
-        pipelineMethods.registration(self.MF,
-                                     tf_obj=utils.ion2fluoTF,
-                                     ili_fdr=self.FDR,
-                                     ds_name=self.IMZML_FILENAME,
-                                     db_name=self.DATABASE,
-                                     email=self.MS_LOGIN,
-                                     password=self.MS_PASS)
+        pipelineMethods.registration(self.vars.MF)
         print("Registration of Pre and Post maldi fidicuals, alignment, and metaspace based annotation finished")
 
 
-class CellSegment(Analysis):
+class GrabMsData():
     def __init__(self):
-        super(CellSegment, self).__init__()
+        self.vars = Analysis()
+
+    def step1(self):
+        self.vars.get_paths()
+        pipelineMethods.grab_ms_data(
+            self.vars.MF,
+            ili_fdr = self.vars.FDR,
+            ds_name = self.vars.IMZML_FILENAME,
+            db_name = self.vars.DATABASE,
+            email = self.vars.MS_LOGIN,
+            password = self.vars.MS_PASS)
+
+
+class CellSegment():
+    def __init__(self):
+        self.vars = Analysis()
 
     def step0(self):
+        self.vars.get_paths()
         print("Images are cropped and are being prepared for cellprofiler")
         # TODO : these window 100 vals are very cryptic and not easy to understand
-        utils.prepare_images(self.MF, self.PREM_DAPI, self.PREM_FLUO, self.COMPOSITE_PNG, window=100)
+        utils.prepare_images(self.vars.MF, self.vars.PREM_DAPI, self.vars.PREM_FLUO, self.vars.COMPOSITE_PNG, window=100)
         print("Images preparation is done")
 
     def step1(self):
+        self.vars.get_paths()
         print("Cell profiler for cell segmentation started")
-        pipelineMethods.cell_segmentation(self.MF, self.CP_PIPELINE)
+        pipelineMethods.cell_segmentation(self.vars.MF, self.vars.CP_PIPELINE)
         print("Cell segmentation finished")
 
     def step2(self):
+        self.vars.get_paths()
         print("Generation of cell distribution image started")
-        pipelineMethods.cell_distrib(self.MF, window=100)
+        pipelineMethods.cell_distrib(self.vars.MF, window=100)
         print("Generation of cell distribution image finished")
 
     def step3(self):
+        self.vars.get_paths()
         print("Generation of cell outlines image started")
-        pipelineMethods.cell_outlines_gen(self.MF, cp_window=100)
+        pipelineMethods.cell_outlines_gen(self.vars.MF, cp_window=100)
         print("Generation of cell outlines image finished")
 
     def step4(self):
+        self.vars.get_paths()
         print("Calling ablation marks analyzer(ili)")
-        csv = self.MFA + 'ili/sm_annotation_detections.csv'
-        img = self.MFA + 'CellProfilerAnalysis/Composite_cropped.tiff'
-        celldist = self.MFA + 'CellProfilerAnalysis/cellDistribution_MALDI.npy'
+        csv = self.vars.MFA + 'ili/sm_annotation_detections.csv'
+        img = self.vars.MFA + 'CellProfilerAnalysis/Composite_cropped.tiff'
+        celldist = self.vars.MFA + 'CellProfilerAnalysis/cellDistribution_MALDI.npy'
         configs = './configs/transforms.json'
-        execut_string = '{} {} -csv {} -img {} -celldist {} -configs {}'.format(self.PYTHON_PATH,
-                                                                                self.ILI,
+        execut_string = '{} {} -csv {} -img {} -celldist {} -configs {}'.format(self.vars.PYTHON_PATH,
+                                                                                self.vars.ILI,
                                                                                 csv,
                                                                                 img,
                                                                                 celldist,
@@ -140,15 +165,20 @@ class CellSegment(Analysis):
         print("Ablation marks analyzer finished")
 
 
-class GenerateCSV(Analysis):
+class GenerateCSV():
+    def __init__(self):
+        self.vars = Analysis()
+
     def step1(self):
-        pipelineMethods.spatio_molecular_matrix(self.MF,
+        self.vars.get_paths()
+        pipelineMethods.spatio_molecular_matrix(self.vars.MF,
                               tf_obj=utils.ion2fluoTF,
-                              udp_path=self.UDP_FILE,
-                              ms_login=self.MS_LOGIN,
-                              ms_password=self.MS_PASS,
-                              ds_name=self.IMZML_FILENAME,
-                              fdr_level=self.FDR)
+                              udp_path=self.vars.UDP_FILE,
+                              ms_login=self.vars.MS_LOGIN,
+                              ms_password=self.vars.MS_PASS,
+                              ds_name=self.vars.IMZML_FILENAME,
+                              fdr_level=self.vars.FDR)
 
     def step2(self):
-        pipelineMethods.map_intensities_on_cells(self.MF, tf_obj=utils.ion2fluoTF)
+        self.vars.get_paths()
+        pipelineMethods.map_intensities_on_cells(self.vars.MF, tf_obj=utils.ion2fluoTF)

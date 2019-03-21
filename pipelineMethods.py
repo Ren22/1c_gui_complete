@@ -84,8 +84,7 @@ def fiducials_finder(MF, preMaldiImg, postMaldiImg):
     spaceM.Registration.ImageRegistration.penMarksFeatures(MF, stitchedImg=postMaldiImg, prefix='post')
 
 
-def registration(MF, tf_obj, do_transform=True, do_ili=True, ili_fdr=0.2,
-    ds_name = None, db_name = None, email = None, password = None):
+def registration(MF, do_transform=True, do_ili=True):
     if not os.path.exists(MF + 'Analysis/Fiducials/optimized_params.npy'):
         spaceM.Registration.ImageRegistration.fiducialsAlignment(MF + 'Analysis/')
 
@@ -96,6 +95,8 @@ def registration(MF, tf_obj, do_transform=True, do_ili=True, ili_fdr=0.2,
         if not os.path.exists(MF + 'Analysis/ili/'):
             os.makedirs(MF + 'Analysis/ili/')
 
+
+def grab_ms_data(MF, ili_fdr=0.2, ds_name=None, db_name=None, email=None, password=None):
     spaceM.Registration.WriteILIinput.annotationSM2CSV(
         MFA=MF + 'Analysis/',
         fdr=ili_fdr,
