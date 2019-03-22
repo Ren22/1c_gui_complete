@@ -1,8 +1,8 @@
 class GlobalVars:
     def __init__(self):
 
-        self.inp_path =  ''
-        self.python_path =  ''
+        self.inpPath =  ''
+        self.pythonPath =  ''
         self.cellprofilerPath = ''
 
         self.stitchedImgPreMPath = ''
@@ -21,6 +21,10 @@ class GlobalVars:
         self.MSPass = ''
         self.database = 'ChEBI-2018-01'
         self.fdr = 0.2
+
+        '''Tab 1'''
+        self.tab1_fftIterations = 20
+        self.tab1_gblurSigma = 10
 
         # self.inp_path =  '/home/renat/EMBL/Sharaz_images/rhodamin'
         # self.python_path =  '/home/renat/miniconda3/bin/python'
@@ -65,10 +69,10 @@ class GlobalVars:
         # self.fdr = 0.5
 
     def set_inp_path(self, new_path):
-        self.inp_path = new_path
+        self.inpPath = new_path
 
     def set_python_path(self, new_path):
-        self.python_path = new_path
+        self.pythonPath = new_path
 
     def set_cellprofiler_path(self, new_path):
         self.cellprofilerPath = new_path
@@ -108,6 +112,13 @@ class GlobalVars:
 
     def set_MS_pass(self, password):
         self.metaspacePass = password
+
+    '''Tab 1'''
+    def set_fftIterations(self, val):
+        self.tab1_fftIterations = val
+
+    def set_gblurSigma(self, val):
+        self.tab1_gblurSigma = val
 
 
 global_vars = GlobalVars()

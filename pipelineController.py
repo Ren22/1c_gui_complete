@@ -12,9 +12,9 @@ class Analysis():
         self.get_paths()
 
     def get_paths(self):
-        ''' GUI paths'''
-        self.MF = global_vars.inp_path + '/'
-        self.PYTHON_PATH = global_vars.python_path
+        ''' GUI general settings'''
+        self.MF = global_vars.inpPath + '/'
+        self.PYTHON_PATH = global_vars.pythonPath
         self.CP = global_vars.cellprofilerPath
 
         self.STITCHED_PRE = global_vars.stitchedImgPreMPath
@@ -40,6 +40,10 @@ class Analysis():
         self.GRIDFIT = self.MFA + 'gridFit/'
         self.ILI = ili_analog.__file__
 
+        ''' GUI AM tab1'''
+        self.TAB1_ITERATIONS = global_vars.tab1_fftIterations
+        self.TAB1_GBLUR_SIGMA = global_vars.tab1_gblurSigma
+
 
 class FindAMinPM():
     def __init__(self):
@@ -59,10 +63,17 @@ class FindAMinPM():
         if not os.path.exists(self.vars.GRIDFIT):
             os.makedirs(self.vars.GRIDFIT)
         print('Ablation mark finding and filtering started')
-        pipelineMethods.ablation_mark_filter(self.vars.MF, self.vars.STITCHED_POST, self.vars.GRIDFIT,
-                                             self.vars.POSTM_DAPI, self.vars.UDP_FILE,
-                                             self.vars.MALDI_METADATA, "{}AM_cropped.tif".format(self.vars.GRIDFIT),
-                                             window=0)
+        pipelineMethods.ablation_mark_filter(
+            MF=self.vars.MF,
+            postMaldiImgPath=self.vars.STITCHED_POST,
+            postMFluoOutputPath=self.vars.GRIDFIT,
+            postMFluoPath=self.vars.POSTM_DAPI,
+            UDPpath=self.vars.UDP_FILE,
+            maldiMetadataPath=self.vars.MALDI_METADATA,
+            bf_img_p="{}AM_cropped.tif".format(self.vars.GRIDFIT),
+            iterations=self.vars.TAB1_ITERATIONS,
+            gblur_sigma=self.vars.TAB1_GBLUR_SIGMA,
+            window=0)
         print('Ablation mark finding and filtering finished')
 
 

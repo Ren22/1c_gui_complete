@@ -4,8 +4,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QThread
 import logging
 from gen_settings.gensettings import GenSettings as gs
+from tabs.Am_finder_tab import AmFinderTab as amfTab
 from pipelineController import *
 from workers.Am_worker import AMWorker
+from workers.Fudicials_filter_worker import FidFilterWorker
+from workers.Reg_image_worker import RegImageWorker
 from workers.Full_pipe_worker import FullPipeWorker
 
 if not os.path.exists('./logs'):
@@ -22,6 +25,7 @@ logging.basicConfig(
 
 logging.info("Running spaceM v0.1")
 
+
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
@@ -29,12 +33,15 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'gen_settings'))
         gs(self)
+        amfTab(self)
         self.connect_callbacks()
         self.set_btns_static_state()
         self.setup_workers()
 
     def setup_workers(self):
         self.setup_am_thread()
+        self.setup_fid_filter_thread()
+        self.setup_reg_image_thread()
         # self.setup_thread()
 
     # def setup_thread(self):
@@ -64,6 +71,35 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.worker_1.pipeStatusToLogger.connect(self.update_logger)
         self.worker_1.incrementStepSig.connect(self.increment_step)
         self.worker_1.changeTabSig.connect(self.update_tab)
+
+    def setup_fid_filter_thread(self):
+        self.thread_2 = QThread()
+        self.worker_2 = FidFilterWorker()
+        self.worker_2.moveToThread(self.thread_2)
+        self.thread_2.started.connect(self.worker_2.work_1)
+        self.worker_2.progressBarSig.connect(self.update_pb)
+        self.worker_2.pipeStatusToLogger.connect(self.update_logger)
+        self.worker_2.incrementStepSig.connect(self.increment_step)
+        self.worker_2.changeTabSig.connect(self.update_tab)
+
+        self.thread_3 = QThread()
+        self.worker_3 = FidFilterWorker()
+        self.worker_3.moveToThread(self.thread_3)
+        self.thread_3.started.connect(self.worker_3.work_2)
+        self.worker_3.progressBarSig.connect(self.update_pb)
+        self.worker_3.pipeStatusToLogger.connect(self.update_logger)
+        self.worker_3.incrementStepSig.connect(self.increment_step)
+        self.worker_3.changeTabSig.connect(self.update_tab)
+
+    def setup_reg_image_thread(self):
+        self.thread_4 = QThread()
+        self.worker_4 = RegImageWorker()
+        self.worker_4.moveToThread(self.thread_4)
+        self.thread_4.started.connect(self.worker_4.work_1)
+        self.worker_4.progressBarSig.connect(self.update_pb)
+        self.worker_4.pipeStatusToLogger.connect(self.update_logger)
+        self.worker_4.incrementStepSig.connect(self.increment_step)
+        self.worker_4.changeTabSig.connect(self.update_tab)
 
     def set_btns_static_state(self):
         self.btnImprtSettings.setEnabled(True)
@@ -125,12 +161,52 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.run_prev_or_next_step()
 
     def run_prev_or_next_step(self):
-        if self.step == 0:
-            self.set_btns_running_state()
-            self.thread_0.start()
-        elif self.step == 1:
-            self.set_btns_running_state()
-            self.thread_1.start()
+        if self.validate_inputs():
+            if self.step == 0:
+                self.set_btns_running_state()
+                self.thread_0.start()
+            elif self.step == 1:
+                self.set_btns_running_state()
+                self.thread_1.start()
+            elif self.step == 2:
+                self.set_btns_running_state()
+                self.thread_2.start()
+            elif self.step == 3:
+                self.set_btns_running_state()
+                self.thread_3.start()
+            elif self.step == 4:
+                self.set_btns_running_state()
+                self.thread_4.start()
+
+    def validate_inputs(self):
+        self.inpPath = gs.get_main_folder(self)
+        self.pythonPath = gs.get_python(self)
+        self.cellprofilerPath = gs.get_cellprofiler(self)
+
+        self.stitchedPreMImage = gs.get_stitchedPreMImage(self)
+        self.stitchedPostMImage = gs.get_stitchedPostMImage(self)
+        self.stitPreMDapiImage = gs.get_stitPreMDapiImage(self)
+        self.stitPostMDapiImage = gs.get_stitPostMDapiImage(self)
+        self.stitPreMSampleImage = gs.get_stitPreMSampleImage(self)
+        self.compositeImg = gs.get_compositeImg(self)
+        self.CPpipeFile = gs.get_CPpipeFile(self)
+        self.udpFile = gs.get_udpFile(self)
+        self.imzMLName = gs.get_imzMLName(self)
+        self.metadata = gs.get_metadata(self)
+
+        self.MSLogin = gs.get_MSLogin(self)
+        self.MSPass = gs.get_MSPass(self)
+
+        '''Tab 1'''
+        # self.tab1_fftIterations = gs.get
+
+        if (self.inpPath and self.pythonPath and self.stitchedPreMImage and \
+            self.stitchedPostMImage and self.stitPreMDapiImage and self.stitPostMDapiImage  \
+            and self.compositeImg and self.udpFile and self.imzMLName \
+                and self.metadata) == '':
+            QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
+        else:
+            return True
 
     def run_pipe(self):
         self.inp_path = gs.get_main_folder(self)
@@ -151,12 +227,8 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.MSLogin = gs.get_MSLogin(self)
         self.MSPass = gs.get_MSPass(self)
 
-        if self.inp_path and self.python_path and self.stitchedPreMImage and \
-            self.stitchedPostMImage and self.stitPreMDapiImage and self.stitPostMDapiImage  \
-            and self.compositeImg and self.udpFile and self.imzMLName \
-                and self.metadata:
+        if self.validate_inputs():
             self.thread.start()
-
         else:
             print(self.inp_path, self.python_path, self.cellprofiler_path, self.stitchedPreMImage, \
             self.stitchedPostMImage , self.stitPreMDapiImage , self.stitPostMDapiImage, \
@@ -178,6 +250,14 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'fids_tab'))
             self.set_btns_static_state()
             self.thread_1.terminate()
+        elif self.step == 3:
+            self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'reg_tab'))
+            self.set_btns_static_state()
+            self.thread_2.terminate()
+        elif self.step == 4:
+            self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'grab_ms_data_tab'))
+            self.set_btns_static_state()
+            self.thread_3.terminate()
 
     def update_pb(self, val):
         self.progressBar.setValue(val)

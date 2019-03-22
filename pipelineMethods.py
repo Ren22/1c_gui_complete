@@ -2,8 +2,18 @@ import os, gc
 import utils
 import spaceM
 
-def ablation_mark_filter(MF, postMaldiImgPath, postMFluoOutputPath, postMFluoPath,
-                         UDPpath, maldiMetadataPath, bf_img_p, marks_check=True, window=0):
+
+def ablation_mark_filter(MF,
+                         postMaldiImgPath,
+                         postMFluoOutputPath,
+                         postMFluoPath,
+                         UDPpath,
+                         maldiMetadataPath,
+                         bf_img_p,
+                         iterations,
+                         gblur_sigma,
+                         marks_check=True,
+                         window=0):
     """Filters ablation marks. First by re-running the ablation mark detection on the cropped stitched images where the
     ablation marks are. Then by fitting a theoretical grid on the detections and taking only the closest detection to
     each grid node. This filters out double detections and re-orders the remaining ones into a uniform index which matches
@@ -25,9 +35,13 @@ def ablation_mark_filter(MF, postMaldiImgPath, postMFluoOutputPath, postMFluoPat
         except (FileNotFoundError, IOError):
             raise Exception(
                 'DAPI image cannot be cropped, please make sure that it is in the directory and has a correct name')
-
-    spaceM.Registration.AblationMarkFinder.GridFit(MF, postMaldiImgPath, UDPpath=UDPpath, maldiMetadataPath=maldiMetadataPath)
-
+    print(iterations, gblur_sigma)
+    spaceM.Registration.AblationMarkFinder.GridFit(MF,
+                                                   postMaldiImgPath=postMaldiImgPath,
+                                                   iterations=iterations,
+                                                   gblur_sigma=gblur_sigma,
+                                                   UDPpath=UDPpath,
+                                                   maldiMetadataPath=maldiMetadataPath)
     if marks_check:
         if not os.path.exists(MF + 'Analysis/gridFit/marks_check/'):
             os.makedirs(MF + 'Analysis/gridFit/marks_check/')

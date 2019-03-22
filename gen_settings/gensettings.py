@@ -1,4 +1,3 @@
-from mainwindow_ui import Ui_MainWindow
 from PyQt5.QtWidgets import *
 from global_vars import global_vars
 
