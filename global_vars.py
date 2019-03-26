@@ -25,6 +25,7 @@ class GlobalVars:
         '''Tab Ablation mark finder'''
         self.tab_amf_fftIterations = 20
         self.tab_amf_gblurSigma = 10
+        self.tab_amf_showRes = False
 
         '''Tab grabbing data from metaspace'''
         self.tab_gms_MSLogin = ''
@@ -116,6 +117,9 @@ class GlobalVars:
 
     def set_gblurSigma(self, val):
         self.tab_amf_gblurSigma = val
+
+    def set_showRes(self, val):
+        self.tab_amf_showRes = val
 
     '''Tab grabbing data from metaspace'''
     def set_MS_login(self, val):

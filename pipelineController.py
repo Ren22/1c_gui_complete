@@ -40,9 +40,13 @@ class Analysis():
         self.GRIDFIT = self.MFA + 'gridFit/'
         self.ILI = ili_analog.__file__
 
-        ''' GUI AM tab1'''
-        self.TAB1_ITERATIONS = global_vars.tab_amf_fftIterations
-        self.TAB1_GBLUR_SIGMA = global_vars.tab_amf_gblurSigma
+        ''' GUI AM Finder tab'''
+        self.TAB_AMF_ITERATIONS = global_vars.tab_amf_fftIterations
+        self.TAB_AMF_GBLUR_SIGMA = global_vars.tab_amf_gblurSigma
+        self.TAB_AMF_SHOW_RES = global_vars.tab_amf_showRes
+
+        ''' GUI grab MS data tab'''
+#         TODO: defing self.TAB_GMS_=...
 
 
 class FindAMinPM():
@@ -71,8 +75,9 @@ class FindAMinPM():
             UDPpath=self.vars.UDP_FILE,
             maldiMetadataPath=self.vars.MALDI_METADATA,
             bf_img_p="{}AM_cropped.tif".format(self.vars.GRIDFIT),
-            iterations=self.vars.TAB1_ITERATIONS,
-            gblur_sigma=self.vars.TAB1_GBLUR_SIGMA,
+            iterations=self.vars.TAB_AMF_ITERATIONS,
+            gblur_sigma=self.vars.TAB_AMF_GBLUR_SIGMA,
+            show_results=self.vars.TAB_AMF_SHOW_RES,
             window=0)
         print('Ablation mark finding and filtering finished')
 

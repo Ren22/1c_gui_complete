@@ -12,6 +12,7 @@ def ablation_mark_filter(MF,
                          bf_img_p,
                          iterations,
                          gblur_sigma,
+                         show_results,
                          marks_check=True,
                          window=0):
     """Filters ablation marks. First by re-running the ablation mark detection on the cropped stitched images where the
@@ -41,7 +42,8 @@ def ablation_mark_filter(MF,
                                                    iterations=iterations,
                                                    gblur_sigma=gblur_sigma,
                                                    UDPpath=UDPpath,
-                                                   maldiMetadataPath=maldiMetadataPath)
+                                                   maldiMetadataPath=maldiMetadataPath,
+                                                   show_results=show_results)
     if marks_check:
         if not os.path.exists(MF + 'Analysis/gridFit/marks_check/'):
             os.makedirs(MF + 'Analysis/gridFit/marks_check/')
