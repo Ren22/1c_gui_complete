@@ -4,14 +4,14 @@ from global_vars import global_vars
 
 class AmFinderTab():
     def __init__(self, ext_obj):
-        ext_obj.tab1_sbFftIters.valueChanged.connect(self.tab1_sbFftItersCallback)
-        ext_obj.tab1_sbFftGblurSigma.valueChanged.connect(self.tab1_sbFftGblurSigmaCallback)
+        ext_obj.tab_amf_sbFftIters.valueChanged.connect(self.tab_amf_sbFftIters)
+        ext_obj.tab_amf_sbFftGblurSigma.valueChanged.connect(self.tab_amf_sbFftGblurSigma)
 
     '''Callbacks'''
     @staticmethod
-    def tab1_sbFftItersCallback(val):
-        global_vars.tab1_fftIterations = val
+    def tab_amf_sbFftIters(val):
+        global_vars.tab_amf_fftIterations = val
 
     @staticmethod
-    def tab1_sbFftGblurSigmaCallback(val):
-        global_vars.tab1_gblurSigma = val
+    def tab_amf_sbFftGblurSigma(val):
+        global_vars.tab_amf_gblurSigma = val

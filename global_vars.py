@@ -22,10 +22,13 @@ class GlobalVars:
         self.database = 'ChEBI-2018-01'
         self.fdr = 0.2
 
-        '''Tab 1'''
-        self.tab1_fftIterations = 20
-        self.tab1_gblurSigma = 10
+        '''Tab Ablation mark finder'''
+        self.tab_amf_fftIterations = 20
+        self.tab_amf_gblurSigma = 10
 
+        '''Tab grabbing data from metaspace'''
+        self.tab_gms_MSLogin = ''
+        self.tab_gms_MSPass = ''
         # self.inp_path =  '/home/renat/EMBL/Sharaz_images/rhodamin'
         # self.python_path =  '/home/renat/miniconda3/bin/python'
         # self.cellprofilerPath = ''
@@ -107,18 +110,19 @@ class GlobalVars:
     def set_maldiMetadata_path(self, new_path):
         self.maldiMetadata = new_path
 
-    def set_MS_login(self, login):
-        self.metaspaceLogin = login
-
-    def set_MS_pass(self, password):
-        self.metaspacePass = password
-
-    '''Tab 1'''
+    '''Tab Ablation mark finder'''
     def set_fftIterations(self, val):
-        self.tab1_fftIterations = val
+        self.tab_amf_fftIterations = val
 
     def set_gblurSigma(self, val):
-        self.tab1_gblurSigma = val
+        self.tab_amf_gblurSigma = val
+
+    '''Tab grabbing data from metaspace'''
+    def set_MS_login(self, val):
+        self.tab_gms_MSLogin = val
+
+    def set_MS_password(self, val):
+        self.tab_gms_MSPass = val
 
 
 global_vars = GlobalVars()

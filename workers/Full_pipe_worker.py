@@ -7,18 +7,18 @@ class FullPipeWorker(QObject):
     progressBarSig = pyqtSignal(int)
     pipeStatusToLogger = pyqtSignal(str)
     changeTabSig = pyqtSignal(int)
-    waitForNextStep = pyqtSignal()
+    finishPipeSig = pyqtSignal()
 
 
     def __init__(self):
         super(FullPipeWorker, self).__init__()
 
-    find_am = FindAMinPM()
     def work_full(self):
-        self.find_am.step1()
+        find_am = FindAMinPM()
+        self.progressBarSig.emit(0)
+        find_am.step1()
         self.progressBarSig.emit(10)
-
-        self.find_am.step2()
+        find_am.step2()
         self.progressBarSig.emit(20)
 
         filter_fiducials = FindFilterFiducials()
@@ -47,3 +47,6 @@ class FullPipeWorker(QObject):
         gen_csv_features.step1()
         gen_csv_features.step2()
         self.progressBarSig.emit(100)
+
+        self.finishPipeSig.emit()
+

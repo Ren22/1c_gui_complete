@@ -5,9 +5,10 @@ from PyQt5.QtCore import QThread
 import logging
 from gen_settings.gensettings import GenSettings as gs
 from tabs.Am_finder_tab import AmFinderTab as amfTab
+from tabs.Grab_ms_data_tab import GrabMSDataTab as gmsTab
 from pipelineController import *
 from workers.Full_pipe_worker import FullPipeWorker
-from workers.Am_worker import AMWorker
+from workers.Am_finder_worker import AMWorker
 from workers.Fudicials_filter_worker import FidFilterWorker
 from workers.Reg_image_worker import RegImageWorker
 from workers.Grab_ms_data_worker import GrabMSDataWorker
@@ -35,11 +36,10 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.step = 0
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'gen_settings'))
-        gs(self)
-        amfTab(self)
+        self.setup_tabs()
+        self.setup_workers()
         self.connect_callbacks()
         self.set_btns_static_state()
-        self.setup_workers()
 
     def setup_workers(self):
         self.setup_full_thread()
@@ -51,15 +51,19 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.setup_cellprof_postproc_thread()
         self.setup_gen_csv_thread()
 
+    def setup_tabs(self):
+        gs(self)
+        amfTab(self)
+        gmsTab(self)
+
     def setup_full_thread(self):
         self.thread_full = QThread()
         self.worker = FullPipeWorker()
         self.worker.moveToThread(self.thread_full)
         self.thread_full.started.connect(self.worker.work_full)
+        self.worker.finishPipeSig.connect(self.fullpipe_finished)
         self.worker.progressBarSig.connect(self.update_pb)
         self.worker.pipeStatusToLogger.connect(self.update_logger)
-        # self.worker.changeTabSig.connect(self.update_tab)
-
     def setup_am_thread(self):
         self.thread_0 = QThread()
         self.worker_0 = AMWorker()
@@ -169,7 +173,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.btnImprtSettings.clicked.connect(self.import_settings)
         self.btnRunNextStep.clicked.connect(self.run_prev_or_next_step)
         self.btnRepeatStep.clicked.connect(self.repeat_step)
-        self.btnStartAnalysis.clicked.connect(self.run_full_pipe)
+        self.btnStartAnalysis.clicked.connect(self.run_full_pipe_check)
 
     def import_settings(self):
         if os.path.exists('./configs/settings.json'):
@@ -190,9 +194,6 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                 self.lineEditUdpFile.setText(settings['udpFile'])
                 self.lineEditimzMLName.setText(settings['imzMLName'])
                 self.lineEditMetadata.setText(settings['maldiMetadata'])
-
-                self.lineEditMSLogin.setText(settings['MSLogin'])
-                self.lineEditMSPass.setText(settings['MSPass'])
         else:
             QMessageBox.warning(self, "Warning", "No settings file found!")
             Exception('Settings file was not found or does not exist')
@@ -237,12 +238,6 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                 self.set_btns_running_state()
                 self.thread_8.start()
 
-    def run_full_pipe(self):
-        if self.validate_inputs():
-            self.set_btns_running_state()
-            self.thread_full.start()
-            self.set_btns_static_state()
-
     def validate_inputs(self):
         self.inpPath = gs.get_main_folder(self)
         self.pythonPath = gs.get_python(self)
@@ -259,8 +254,8 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.imzMLName = gs.get_imzMLName(self)
         self.metadata = gs.get_metadata(self)
 
-        self.MSLogin = gs.get_MSLogin(self)
-        self.MSPass = gs.get_MSPass(self)
+        self.MSLogin = gmsTab.get_MSLogin()
+        self.MSPass = gmsTab.get_MSPass()
 
         '''Tab 1'''
         #     TODO: DEV only - bypassing all checks
@@ -273,8 +268,37 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             and self.compositeImg and self.udpFile and self.imzMLName \
                 and self.metadata) == '':
             QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
+
+        elif (self.MSLogin and self.MSPass) == '':
+                btnEnterMsLogin = QMessageBox.question(self, "Warning", "You haven't entered Metaspace login and Password on "
+                                                     "Grab MS data tab, so you won't be able to access any "
+                                                     "private datasets uploaded to the Metaspace. Proceed anyway?")
+                if btnEnterMsLogin == QMessageBox.Yes:
+                    return True
         else:
             return True
+
+    '''Running threads of workers/Full pipeline'''
+    def run_full_pipe(self):
+        if self.validate_inputs():
+            self.set_btns_running_state()
+            self.thread_full.start()
+
+    def run_full_pipe_check(self):
+        if self.step != 0 and self.step != 8:
+            btnRunPipeReply = QMessageBox.question(self, "Warning", "You are in the middle of running pipeline step by step wise, "
+                                                    "running the full pipeline will start it from the first step again. "
+                                                    "Are you sure you want to proceed?")
+            if btnRunPipeReply == QMessageBox.Yes:
+                self.run_full_pipe()
+            else:
+                print('Running the full pipeline was aborted.')
+        else:
+            self.run_full_pipe()
+
+    def fullpipe_finished(self):
+        self.thread_full.terminate()
+        self.set_btns_static_state()
 
     def update_tab(self):
         if self.step == 1:

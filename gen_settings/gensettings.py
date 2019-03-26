@@ -35,9 +35,6 @@ class GenSettings():
         ext_obj.lineEditUdpFile.textChanged[str].connect(lambda: self.set_udpFile(ext_obj))
         ext_obj.lineEditimzMLName.textChanged[str].connect(lambda: self.set_imzMLName(ext_obj))
         ext_obj.lineEditMetadata.textChanged[str].connect(lambda: self.set_metadata(ext_obj))
-    
-        ext_obj.lineEditMSLogin.textChanged[str].connect(lambda: self.set_MSLogin(ext_obj))
-        ext_obj.lineEditMSPass.textChanged[str].connect(lambda: self.set_MSPass(ext_obj))
 
     @staticmethod
     def dir_path_finder(ext_obj):
@@ -237,11 +234,3 @@ class GenSettings():
     @staticmethod 
     def get_metadata(ext_obj):
         return ext_obj.lineEditMetadata.text()
-
-    @staticmethod 
-    def get_MSLogin(ext_obj):
-        return ext_obj.lineEditMSLogin.text()
-
-    @staticmethod 
-    def get_MSPass(ext_obj):
-        return ext_obj.lineEditMSPass.text()

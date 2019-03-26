@@ -41,8 +41,8 @@ class Analysis():
         self.ILI = ili_analog.__file__
 
         ''' GUI AM tab1'''
-        self.TAB1_ITERATIONS = global_vars.tab1_fftIterations
-        self.TAB1_GBLUR_SIGMA = global_vars.tab1_gblurSigma
+        self.TAB1_ITERATIONS = global_vars.tab_amf_fftIterations
+        self.TAB1_GBLUR_SIGMA = global_vars.tab_amf_gblurSigma
 
 
 class FindAMinPM():
@@ -123,11 +123,11 @@ class GrabMsData():
         self.vars.get_paths()
         pipelineMethods.grab_ms_data(
             self.vars.MF,
-            ili_fdr = self.vars.FDR,
-            ds_name = self.vars.IMZML_FILENAME,
-            db_name = self.vars.DATABASE,
-            email = self.vars.MS_LOGIN,
-            password = self.vars.MS_PASS)
+            ili_fdr=self.vars.FDR,
+            ds_name=self.vars.IMZML_FILENAME,
+            db_name=self.vars.DATABASE,
+            email=self.vars.MS_LOGIN,
+            password=self.vars.MS_PASS)
 
 
 class CellSegment():
@@ -174,7 +174,6 @@ class CellSegment():
                                                                                 configs)
         call(execut_string, shell=True)
         print("Ablation marks analyzer finished")
-
 
 class GenerateCSV():
     def __init__(self):
