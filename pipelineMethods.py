@@ -1,6 +1,9 @@
 import os, gc
 import utils
-import spaceM
+# TODO: temporal hack to test local spaceM
+import sys
+sys.path.insert(0, "../")
+from spaceM import spaceM
 
 
 def ablation_mark_filter(MF,
@@ -13,6 +16,7 @@ def ablation_mark_filter(MF,
                          iterations,
                          gblur_sigma,
                          show_results,
+                         iFFTImage_p,
                          marks_check=True,
                          window=0):
     """Filters ablation marks. First by re-running the ablation mark detection on the cropped stitched images where the
@@ -36,6 +40,8 @@ def ablation_mark_filter(MF,
         except (FileNotFoundError, IOError):
             raise Exception(
                 'DAPI image cannot be cropped, please make sure that it is in the directory and has a correct name')
+
+
     print(iterations, gblur_sigma)
     spaceM.Registration.AblationMarkFinder.GridFit(MF,
                                                    postMaldiImgPath=postMaldiImgPath,
@@ -43,7 +49,8 @@ def ablation_mark_filter(MF,
                                                    gblur_sigma=gblur_sigma,
                                                    UDPpath=UDPpath,
                                                    maldiMetadataPath=maldiMetadataPath,
-                                                   show_results=show_results)
+                                                   show_results=show_results,
+                                                   iFFTImage_p=iFFTImage_p)
     if marks_check:
         if not os.path.exists(MF + 'Analysis/gridFit/marks_check/'):
             os.makedirs(MF + 'Analysis/gridFit/marks_check/')

@@ -22,11 +22,9 @@ class GrabMSDataTab():
     @staticmethod
     def loginMS(ext_obj):
         sm = smau.SMInstance()
-        sm.login(email=global_vars.tab_gms_MSLogin,
-                 password=global_vars.tab_gms_MSPass)
-        if sm.login_status() == 200:
+        if sm.login(email=global_vars.tab_gms_MSLogin,
+                    password=global_vars.tab_gms_MSPass):
             ext_obj.tab_gms_msLoginStatus.setText('Super. Now you are authorized!')
-
 
     '''Getters'''
     @staticmethod

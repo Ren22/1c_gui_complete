@@ -54,10 +54,7 @@ def crop2coords(coords_p, img_p, save_p, window):
     Y = [int(y) for y in Y]
     if img_p.split('/')[-1].split('.') == 'tif' or img_p.split('/')[-1].split('.') == 'tiff':
         img = tiff.imread(img_p)
-        output_path = save_p + '.tiff'
         tiff.imsave(save_p, img[np.min(X)-window:np.max(X)+window, np.min(Y)-window:np.max(Y)+window])
-    # if len(img_p.split('/')[-1].split('.')) == 1:
-    #     img = tiff.imread(img_p)
     else:
         img = plt.imread(img_p)
         scipy.misc.imsave(save_p, img[np.min(X)-window:np.max(X)+window, np.min(Y)-window:np.max(Y)+window])

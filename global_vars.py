@@ -26,6 +26,7 @@ class GlobalVars:
         self.tab_amf_fftIterations = 20
         self.tab_amf_gblurSigma = 10
         self.tab_amf_showRes = False
+        # self.tab
 
         '''Tab grabbing data from metaspace'''
         self.tab_gms_MSLogin = ''

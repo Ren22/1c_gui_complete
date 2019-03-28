@@ -44,6 +44,7 @@ class Analysis():
         self.TAB_AMF_ITERATIONS = global_vars.tab_amf_fftIterations
         self.TAB_AMF_GBLUR_SIGMA = global_vars.tab_amf_gblurSigma
         self.TAB_AMF_SHOW_RES = global_vars.tab_amf_showRes
+        self.TAB_AMF_iFFT_IMAGE_P = None
 
         ''' GUI grab MS data tab'''
 #         TODO: defing self.TAB_GMS_=...
@@ -78,6 +79,7 @@ class FindAMinPM():
             iterations=self.vars.TAB_AMF_ITERATIONS,
             gblur_sigma=self.vars.TAB_AMF_GBLUR_SIGMA,
             show_results=self.vars.TAB_AMF_SHOW_RES,
+            iFFTImage_p=self.vars.TAB_AMF_iFFT_IMAGE_P,
             window=0)
         print('Ablation mark finding and filtering finished')
 

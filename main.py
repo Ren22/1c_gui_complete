@@ -64,6 +64,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.worker.finishPipeSig.connect(self.fullpipe_finished)
         self.worker.progressBarSig.connect(self.update_pb)
         self.worker.pipeStatusToLogger.connect(self.update_logger)
+
     def setup_am_thread(self):
         self.thread_0 = QThread()
         self.worker_0 = AMWorker()
@@ -93,18 +94,28 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.worker_2.incrementStepSig.connect(self.increment_step)
         self.worker_2.changeTabSig.connect(self.update_tab)
 
+        # self.thread_3 = QThread()
+        # self.worker_3 = FidFilterWorker()
+        # self.worker_3.moveToThread(self.thread_3)
+        # self.thread_3.started.connect(self.worker_3.work_2)
+        # self.worker_3.progressBarSig.connect(self.update_pb)
+        # self.worker_3.pipeStatusToLogger.connect(self.update_logger)
+        # self.worker_3.incrementStepSig.connect(self.increment_step)
+        # self.worker_3.changeTabSig.connect(self.update_tab)
+
+    def setup_reg_image_thread(self):
         self.thread_3 = QThread()
-        self.worker_3 = FidFilterWorker()
+        self.worker_3 = RegImageWorker()
         self.worker_3.moveToThread(self.thread_3)
-        self.thread_3.started.connect(self.worker_3.work_2)
+        self.thread_3.started.connect(self.worker_3.work_1)
         self.worker_3.progressBarSig.connect(self.update_pb)
         self.worker_3.pipeStatusToLogger.connect(self.update_logger)
         self.worker_3.incrementStepSig.connect(self.increment_step)
         self.worker_3.changeTabSig.connect(self.update_tab)
 
-    def setup_reg_image_thread(self):
+    def setup_grab_ms_data_thread(self):
         self.thread_4 = QThread()
-        self.worker_4 = RegImageWorker()
+        self.worker_4 = GrabMSDataWorker()
         self.worker_4.moveToThread(self.thread_4)
         self.thread_4.started.connect(self.worker_4.work_1)
         self.worker_4.progressBarSig.connect(self.update_pb)
@@ -112,25 +123,15 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.worker_4.incrementStepSig.connect(self.increment_step)
         self.worker_4.changeTabSig.connect(self.update_tab)
 
-    def setup_grab_ms_data_thread(self):
+    def setup_cellprof_thread(self):
         self.thread_5 = QThread()
-        self.worker_5 = GrabMSDataWorker()
+        self.worker_5 = CPWorker()
         self.worker_5.moveToThread(self.thread_5)
         self.thread_5.started.connect(self.worker_5.work_1)
         self.worker_5.progressBarSig.connect(self.update_pb)
         self.worker_5.pipeStatusToLogger.connect(self.update_logger)
         self.worker_5.incrementStepSig.connect(self.increment_step)
         self.worker_5.changeTabSig.connect(self.update_tab)
-
-    def setup_cellprof_thread(self):
-        self.thread_6 = QThread()
-        self.worker_6 = CPWorker()
-        self.worker_6.moveToThread(self.thread_6)
-        self.thread_6.started.connect(self.worker_6.work_1)
-        self.worker_6.progressBarSig.connect(self.update_pb)
-        self.worker_6.pipeStatusToLogger.connect(self.update_logger)
-        self.worker_6.incrementStepSig.connect(self.increment_step)
-        self.worker_6.changeTabSig.connect(self.update_tab)
         
     def setup_cellprof_postproc_thread(self):
         self.thread_7 = QThread()

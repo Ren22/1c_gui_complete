@@ -15,12 +15,12 @@ class FidFilterWorker(QObject):
 
     def work_1(self):
         self.filter_fiducials.step1()
-        self.progressBarSig.emit(30)
-        self.incrementStepSig.emit()
-        self.changeTabSig.emit()
-
-    def work_2(self):
         self.filter_fiducials.step2()
         self.progressBarSig.emit(40)
         self.incrementStepSig.emit()
         self.changeTabSig.emit()
+        # self.incrementStepSig.emit()
+        # self.changeTabSig.emit()
+
+    # def work_2(self):
+

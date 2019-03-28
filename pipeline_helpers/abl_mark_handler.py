@@ -153,29 +153,34 @@ class WidgetPlot(QWidget):
                           '.png', '.PNG',
                           '.tif', '.tiff', 'TIFF'} or \
                 (self.inpFilePath != '' and self.ext == ''):
-            input = Image.open(self.inpFilePath)
-            self.ext = input.format
-            if input.mode == 'I;16B':
-                img = {'src': Image.open(self.inpFilePath), 'mode': 'I;16B',
-                       'croppedImgCoords': self.croppedImgCoords, 'pltTitle': self.pltTitle}
-            else:
-                img = {'src': Image.open(self.inpFilePath).convert('RGBA'), 'mode': 'RGBA',
-                       'croppedImgCoords': self.croppedImgCoords, 'pltTitle': self.pltTitle}
-            if isinstance(self.canvas, PlotCanvas):
-                self.clearWidgetLayout(self.layout())
-                self.canvas = PlotCanvasImg(img)
-                self.toolbar = NavigationToolbar(self.canvas, self)
-                self.layout().addWidget(self.toolbar)
-                self.layout().addWidget(self.canvas)
-            elif isinstance(self.canvas, PlotCanvasImg):
-                self.canvas.stackImgArr = []
-                self.canvas.refresh_Img_plot(img)
-                self.canvas.initCropCoords(img)
-            elif not self.canvas:
-                self.canvas = PlotCanvasImg(img)
-                self.toolbar = NavigationToolbar(self.canvas, self)
-                self.layout().addWidget(self.toolbar)
-                self.layout().addWidget(self.canvas)
+            try:
+                input = Image.open(self.inpFilePath)
+                self.ext = input.format
+                if input.mode == 'I;16B':
+                    img = {'src': Image.open(self.inpFilePath), 'mode': 'I;16B',
+                           'croppedImgCoords': self.croppedImgCoords, 'pltTitle': self.pltTitle}
+                else:
+                    img = {'src': Image.open(self.inpFilePath).convert('RGBA'), 'mode': 'RGBA',
+                           'croppedImgCoords': self.croppedImgCoords, 'pltTitle': self.pltTitle}
+                if isinstance(self.canvas, PlotCanvas):
+                    self.clearWidgetLayout(self.layout())
+                    self.canvas = PlotCanvasImg(img)
+                    self.toolbar = NavigationToolbar(self.canvas, self)
+                    self.layout().addWidget(self.toolbar)
+                    self.layout().addWidget(self.canvas)
+                elif isinstance(self.canvas, PlotCanvasImg):
+                    self.canvas.stackImgArr = []
+                    self.canvas.refresh_Img_plot(img)
+                    self.canvas.initCropCoords(img)
+                elif not self.canvas:
+                    self.canvas = PlotCanvasImg(img)
+                    self.toolbar = NavigationToolbar(self.canvas, self)
+                    self.layout().addWidget(self.toolbar)
+                    self.layout().addWidget(self.canvas)
+            except FileNotFoundError:
+                QMessageBox.warning(self, "Warning", "No such file or directory,"
+                                                     " please check that the path is correctly provided")
+
         else:
             QMessageBox.warning(self, "Warning", "The file was not chosen or the extension is not supported!")
 
