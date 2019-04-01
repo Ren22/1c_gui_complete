@@ -33,7 +33,7 @@ logging.info("Running spaceM v0.1")
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
-        self.step = 0
+        self.step = 6
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'gen_settings'))
         self.setup_tabs()
@@ -94,15 +94,6 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.worker_2.incrementStepSig.connect(self.increment_step)
         self.worker_2.changeTabSig.connect(self.update_tab)
 
-        # self.thread_3 = QThread()
-        # self.worker_3 = FidFilterWorker()
-        # self.worker_3.moveToThread(self.thread_3)
-        # self.thread_3.started.connect(self.worker_3.work_2)
-        # self.worker_3.progressBarSig.connect(self.update_pb)
-        # self.worker_3.pipeStatusToLogger.connect(self.update_logger)
-        # self.worker_3.incrementStepSig.connect(self.increment_step)
-        # self.worker_3.changeTabSig.connect(self.update_tab)
-
     def setup_reg_image_thread(self):
         self.thread_3 = QThread()
         self.worker_3 = RegImageWorker()
@@ -134,24 +125,24 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.worker_5.changeTabSig.connect(self.update_tab)
         
     def setup_cellprof_postproc_thread(self):
+        self.thread_6 = QThread()
+        self.worker_6 = CPWorker()
+        self.worker_6.moveToThread(self.thread_6)
+        self.thread_6.started.connect(self.worker_6.work_2)
+        self.worker_6.progressBarSig.connect(self.update_pb)
+        self.worker_6.pipeStatusToLogger.connect(self.update_logger)
+        self.worker_6.incrementStepSig.connect(self.increment_step)
+        self.worker_6.changeTabSig.connect(self.update_tab)
+        
+    def setup_gen_csv_thread(self):
         self.thread_7 = QThread()
-        self.worker_7 = CPWorker()
+        self.worker_7 = GenCSVWorker()
         self.worker_7.moveToThread(self.thread_7)
-        self.thread_7.started.connect(self.worker_7.work_2)
+        self.thread_7.started.connect(self.worker_7.work_1)
         self.worker_7.progressBarSig.connect(self.update_pb)
         self.worker_7.pipeStatusToLogger.connect(self.update_logger)
         self.worker_7.incrementStepSig.connect(self.increment_step)
         self.worker_7.changeTabSig.connect(self.update_tab)
-        
-    def setup_gen_csv_thread(self):
-        self.thread_8 = QThread()
-        self.worker_8 = GenCSVWorker()
-        self.worker_8.moveToThread(self.thread_8)
-        self.thread_8.started.connect(self.worker_8.work_1)
-        self.worker_8.progressBarSig.connect(self.update_pb)
-        self.worker_8.pipeStatusToLogger.connect(self.update_logger)
-        self.worker_8.incrementStepSig.connect(self.increment_step)
-        self.worker_8.changeTabSig.connect(self.update_tab)
 
     def set_btns_static_state(self):
         self.btnImprtSettings.setEnabled(True)
@@ -201,6 +192,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
 
     def increment_step(self):
         self.step += 1
+        print(self.step)
 
     def decrement_step(self):
         self.step -= 1
@@ -327,11 +319,10 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             self.set_btns_static_state()
             self.thread_5.terminate()
         elif self.step == 7:
+            self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'csv_gen_tab'))
             self.set_btns_static_state()
             self.thread_6.terminate()
         elif self.step == 8:
-            self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'csv_gen_tab'))
-            self.set_btns_static_state()
             self.thread_7.terminate()
 
     def update_pb(self, val):

@@ -4,6 +4,7 @@ import tifffile as tiff
 import scipy
 import os, json
 from PIL import Image
+from errors import check_paths
 
 CONFIGS = './configs/transforms.json'
 
@@ -86,12 +87,13 @@ def ion2fluoTF(ion_img):
             elif i == 1:
                 ion_img = np.rot90(ion_img, 1)
     return ion_img
-    #return ion_img.T  # --> TF1 HepaJune dataset batches FASTER
 
 
 def prepare_images(MF, preM_dapi, preM_fluo, composite, window=0):
     if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/'):
         os.makedirs(MF + 'Analysis/CellProfilerAnalysis/')
+    # preM_fluo should not be checked as it's an optional field
+    check_paths(preM_dapi, composite)
     preM_dapi_name = os.path.basename(preM_dapi)
     preM_fluo_name = os.path.basename(preM_fluo)
     composite_name = os.path.basename(composite)
@@ -111,12 +113,13 @@ def prepare_images(MF, preM_dapi, preM_fluo, composite, window=0):
 
     crop2coords(
         MF + 'Analysis/Fiducials/transformedMarks.npy',
-        preM_fluo,
-        MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(preM_fluo_name)),
-        window=window)
-
-    crop2coords(
-        MF + 'Analysis/Fiducials/transformedMarks.npy',
         composite,
         MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(composite_name)),
         window=window)
+
+    if preM_fluo:
+        crop2coords(
+            MF + 'Analysis/Fiducials/transformedMarks.npy',
+            preM_fluo,
+            MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(preM_fluo_name)),
+            window=window)

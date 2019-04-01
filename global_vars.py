@@ -17,10 +17,8 @@ class GlobalVars:
         self.imzMLName = ''
         self.maldiMetadata = ''
 
-        self.MSLogin = ''
-        self.MSPass = ''
-        self.database = 'ChEBI-2018-01'
-        self.fdr = 0.2
+        self.database = 'SwissLipids-2018-02-02'
+        self.fdr = 0.1
 
         '''Tab Ablation mark finder'''
         self.tab_amf_fftIterations = 20

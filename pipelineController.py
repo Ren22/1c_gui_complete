@@ -29,8 +29,8 @@ class Analysis():
         self.IMZML_FILENAME = global_vars.imzMLName
         self.MALDI_METADATA = global_vars.maldiMetadata
 
-        self.MS_LOGIN = global_vars.MSLogin
-        self.MS_PASS = global_vars.MSPass
+        self.MS_LOGIN = global_vars.tab_gms_MSLogin
+        self.MS_PASS = global_vars.tab_gms_MSPass
         self.DATABASE = global_vars.database
         self.FDR = global_vars.fdr
 

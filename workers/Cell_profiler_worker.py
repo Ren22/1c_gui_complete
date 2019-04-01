@@ -17,6 +17,7 @@ class CPWorker(QObject):
         self.cp_worker.step0()
         self.cp_worker.step1()
         self.progressBarSig.emit(70)
+        self.incrementStepSig.emit()
         self.changeTabSig.emit()
 
     def work_2(self):
