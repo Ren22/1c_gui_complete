@@ -43,14 +43,14 @@ def ablation_mark_filter(MF,
 
 
     print(iterations, gblur_sigma)
-    spaceM.Registration.AblationMarkFinder.GridFit(MF,
-                                                   postMaldiImgPath=postMaldiImgPath,
-                                                   iterations=iterations,
-                                                   gblur_sigma=gblur_sigma,
-                                                   UDPpath=UDPpath,
-                                                   maldiMetadataPath=maldiMetadataPath,
-                                                   show_results=show_results,
-                                                   iFFTImage_p=iFFTImage_p)
+    spaceM.Registration.gridfit.GridFit(MF,
+                                        postMaldiImgPath=postMaldiImgPath,
+                                        iterations=iterations,
+                                        gblur_sigma=gblur_sigma,
+                                        UDPpath=UDPpath,
+                                        maldiMetadataPath=maldiMetadataPath,
+                                        show_results=show_results,
+                                        iFFTImage_p=iFFTImage_p)
     if marks_check:
         if not os.path.exists(MF + 'Analysis/gridFit/marks_check/'):
             os.makedirs(MF + 'Analysis/gridFit/marks_check/')
@@ -88,8 +88,8 @@ def ablation_mark_filter(MF,
     if not os.path.exists(MF + 'Analysis/gridFit/marksMask.npy'):
         # Provide maxDist=17 for the rho 2 exp
         # spaceM.Registration.AblationMarkFinder.regionGrowingAblationMarks(MF, window=window, maxDist=17)
-        spaceM.Registration.AblationMarkFinder.regionGrowingAblationMarks(MF, window=window)
-        spaceM.Registration.AblationMarkFinder.AM_filter(MF, window=window)
+        spaceM.RegionGrowAlg.reggrow_am_marks(MF, window=window, matrix=None)
+        spaceM.AMFinder.am_filter(MF, window=window)
 
 
 def fiducials_finder(MF, preMaldiImg, postMaldiImg):
@@ -171,7 +171,9 @@ def spatio_molecular_matrix(MF,
         tf_obj=tf_obj,
         CDs=CDs,
         norm_method='weighted_mean_sampling_area_MarkCell_overlap_ratio_sampling_area',
-        fetch_ann=fetch_ann, tol_fact=tol_fact, filter=filter,
+        fetch_ann=fetch_ann,
+        tol_fact=tol_fact,
+        filter=filter,
         fluo_path=MF + 'Analysis/CellProfilerAnalysis/rhodamine_cropped.tiff',
         fluo_nucl_path=MF + 'Analysis/CellProfilerAnalysis/dapi_cropped.tiff',
         ili_csv_file_path=MF + 'Analysis/ili/sm_annotation_detections.csv',
