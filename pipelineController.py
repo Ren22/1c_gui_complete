@@ -44,7 +44,8 @@ class Analysis():
         self.TAB_AMF_ITERATIONS = global_vars.tab_amf_fftIterations
         self.TAB_AMF_GBLUR_SIGMA = global_vars.tab_amf_gblurSigma
         self.TAB_AMF_SHOW_RES = global_vars.tab_amf_showRes
-        self.TAB_AMF_iFFT_IMAGE_P = None
+        self.TAB_AMF_iFFT_IMAGE_P = False
+        self.TAB_AMF_MATRIX_TYPE = 'DAN'
 
         ''' GUI grab MS data tab'''
 #         TODO: defing self.TAB_GMS_=...
@@ -80,6 +81,7 @@ class FindAMinPM():
             gblur_sigma=self.vars.TAB_AMF_GBLUR_SIGMA,
             show_results=self.vars.TAB_AMF_SHOW_RES,
             iFFTImage_p=self.vars.TAB_AMF_iFFT_IMAGE_P,
+            matrix_type=self.vars.TAB_AMF_MATRIX_TYPE,
             window=0)
         print('Ablation mark finding and filtering finished')
 
@@ -170,7 +172,9 @@ class CellSegment():
         self.vars.get_paths()
         print("Calling ablation marks analyzer(ili)")
         csv = self.vars.MFA + 'ili/sm_annotation_detections.csv'
-        img = self.vars.MFA + 'CellProfilerAnalysis/Composite_cropped.tiff'
+        img = self.vars.MFA + 'CellProfilerAnalysis/Composite.png' or \
+              self.vars.MFA + 'CellProfilerAnalysis/Composite.tiff' or \
+              self.vars.MFA + 'CellProfilerAnalysis/Composite.tif'
         celldist = self.vars.MFA + 'CellProfilerAnalysis/cellDistribution_MALDI.npy'
         configs = './configs/transforms.json'
         execut_string = '{} {} -csv {} -img {} -celldist {} -configs {}'.format(self.vars.PYTHON_PATH,

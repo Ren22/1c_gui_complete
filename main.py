@@ -33,7 +33,7 @@ logging.info("Running spaceM v0.1")
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
-        self.step = 7
+        self.step = 4
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'gen_settings'))
         self.setup_tabs()
@@ -147,7 +147,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
     def set_btns_static_state(self):
         self.btnImprtSettings.setEnabled(True)
         self.btnSaveSettings.setEnabled(True)
-        if self.step == 0:
+        if self.step == 8:
             self.btnRepeatStep.setEnabled(False)
         else:
             self.btnRepeatStep.setEnabled(True)
@@ -252,24 +252,22 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
 
         '''Tab 1'''
         #     TODO: DEV only - bypassing all checks
-        #     self.run_new_Thread.start()
-        #     self.run_new_Thread.progressBarSig.connect(self.update_pb)
-        #     self.run_new_Thread.pipeStatusToLogger.connect(self.update_logger)
 
-        if (self.inpPath and self.pythonPath and self.stitchedPreMImage and \
-            self.stitchedPostMImage and self.stitPreMDapiImage and self.stitPostMDapiImage  \
-            and self.compositeImg and self.udpFile and self.imzMLName \
-                and self.metadata) == '':
-            QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
 
-        elif (self.MSLogin and self.MSPass) == '':
-                btnEnterMsLogin = QMessageBox.question(self, "Warning", "You haven't entered Metaspace login and Password on "
-                                                     "Grab MS data tab, so you won't be able to access any "
-                                                     "private datasets uploaded to the Metaspace. Proceed anyway?")
-                if btnEnterMsLogin == QMessageBox.Yes:
-                    return True
-        else:
-            return True
+        # if (self.inpPath and self.pythonPath and self.stitchedPreMImage and \
+        #     self.stitchedPostMImage and self.stitPreMDapiImage and self.stitPostMDapiImage  \
+        #     and self.compositeImg and self.udpFile and self.imzMLName \
+        #         and self.metadata) == '':
+        #     QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
+        #
+        # elif (self.MSLogin and self.MSPass) == '':
+        #         btnEnterMsLogin = QMessageBox.question(self, "Warning", "You haven't entered Metaspace login and Password on "
+        #                                              "Grab MS data tab, so you won't be able to access any "
+        #                                              "private datasets uploaded to the Metaspace. Proceed anyway?")
+        #         if btnEnterMsLogin == QMessageBox.Yes:
+        #             return True
+        # else:
+        return True
 
     '''Running threads of workers/Full pipeline'''
     def run_full_pipe(self):

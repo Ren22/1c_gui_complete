@@ -369,6 +369,6 @@ def tf(img, transform=None):
 if __name__ == '__main__':
     fiji_path = '/home/renat/EMBL/software/Fiji.app/ImageJ-linux64'
     MF = '/home/renat/EMBL/Sharaz_images/1_1mM_Tet_UNW_DMEM/'
-    transform = '' #  left right = lr, left right + upside-down = lr_up, '' = no trasnform
+    transform = '' #  left_right = lr, left right + upside-down = lr_up, '' = no trasnform
     st_index = 1
     stitchMicroscopy(MF, tf, fiji_path, transform, start_index=st_index)

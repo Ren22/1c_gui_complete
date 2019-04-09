@@ -8,8 +8,6 @@ from spaceM import spaceM
 
 def ablation_mark_filter(MF,
                          postMaldiImgPath,
-                         postMFluoOutputPath,
-                         postMFluoPath,
                          UDPpath,
                          maldiMetadataPath,
                          bf_img_p,
@@ -17,6 +15,9 @@ def ablation_mark_filter(MF,
                          gblur_sigma,
                          show_results,
                          iFFTImage_p,
+                         postMFluoOutputPath,
+                         postMFluoPath,
+                         matrix_type,
                          marks_check=True,
                          window=0):
     """Filters ablation marks. First by re-running the ablation mark detection on the cropped stitched images where the
@@ -31,26 +32,24 @@ def ablation_mark_filter(MF,
     Data are stored in MF + /Analysis/gridFit/
     Visualization are stored in MF + /Analysis/gridFit/marks_check/
     """
-    if postMFluoPath:
-        try:
-            utils.cropFluo_img(postMFluoPath,
-                               bf_img_p,
-                               output_p=postMFluoOutputPath,
-                               coords_p=MF + 'Analysis/gridFit/AM_cropped_coords.npy')
-        except (FileNotFoundError, IOError):
-            raise Exception(
-                'DAPI image cannot be cropped, please make sure that it is in the directory and has a correct name')
+    # if not os.path.exists(MF + '/Analysis/gridFit/cropped_preM_channels'):
+    #     os.makedirs(MF + '/Analysis/gridFit/cropped_preM_channels')
+    # utils.prepared_cropped_img_amfinder(MF, bf_img_p, 'pre')
 
+    if not os.path.exists(MF + '/Analysis/gridFit/cropped_postM_channels'):
+        os.makedirs(MF + '/Analysis/gridFit/cropped_postM_channels')
+    utils.prepared_cropped_img_amfinder(MF, bf_img_p, 'post')
+    # print(iterations, gblur_sigma)
 
-    print(iterations, gblur_sigma)
-    spaceM.Registration.gridfit.GridFit(MF,
-                                        postMaldiImgPath=postMaldiImgPath,
-                                        iterations=iterations,
-                                        gblur_sigma=gblur_sigma,
-                                        UDPpath=UDPpath,
-                                        maldiMetadataPath=maldiMetadataPath,
-                                        show_results=show_results,
-                                        iFFTImage_p=iFFTImage_p)
+    spaceM.AMFinder.gridfit.GridFit(MF,
+                                    postMaldiImgPath=postMaldiImgPath,
+                                    iterations=iterations,
+                                    gblur_sigma=gblur_sigma,
+                                    UDPpath=UDPpath,
+                                    matrix_type=matrix_type,
+                                    maldiMetadataPath=maldiMetadataPath,
+                                    show_results=show_results,
+                                    iFFTImage_p=iFFTImage_p)
     if marks_check:
         if not os.path.exists(MF + 'Analysis/gridFit/marks_check/'):
             os.makedirs(MF + 'Analysis/gridFit/marks_check/')
@@ -88,8 +87,8 @@ def ablation_mark_filter(MF,
     if not os.path.exists(MF + 'Analysis/gridFit/marksMask.npy'):
         # Provide maxDist=17 for the rho 2 exp
         # spaceM.Registration.AblationMarkFinder.regionGrowingAblationMarks(MF, window=window, maxDist=17)
-        spaceM.RegionGrowAlg.reggrow_am_marks(MF, window=window, matrix=None)
-        spaceM.AMFinder.am_filter(MF, window=window)
+        spaceM.RegionGrowAlg.reggrow_am_marks.regionGrowingAblationMarks(MF, window=window, matrix=None)
+        spaceM.AMFinder.am_filter.AM_filter(MF, window=window)
 
 
 def fiducials_finder(MF, preMaldiImg, postMaldiImg):
@@ -119,7 +118,7 @@ def registration(MF, do_transform=True, do_ili=True):
             os.makedirs(MF + 'Analysis/ili/')
 
 
-def grab_ms_data(MF, ili_fdr=0.2, ds_name=None, db_name=None, email=None, password=None):
+def grab_ms_data(MF, ili_fdr=0.5, ds_name=None, db_name=None, email=None, password=None):
     spaceM.Registration.WriteILIinput.annotationSM2CSV(
         MFA=MF + 'Analysis/',
         fdr=ili_fdr,
@@ -145,7 +144,10 @@ def cell_distrib(MF, window):
 
 
 def cell_outlines_gen(MF, cp_window):
-    spaceM.scAnalysis.Segmentation.cellOutlines(MF + 'Analysis/CellProfilerAnalysis/Composite_cropped.tiff',
+    compos_path = MF + 'Analysis/CellProfilerAnalysis/Composite.png' or \
+    MF + 'Analysis/CellProfilerAnalysis/Composite.tiff' or \
+    MF + 'Analysis/CellProfilerAnalysis/Composite.tif'
+    spaceM.scAnalysis.Segmentation.cellOutlines(compos_path,
                                                        cp_window,
                                                        MF + 'Analysis/CellProfilerAnalysis/Labelled_cells.tiff',
                                                        MF + 'Analysis/CellProfilerAnalysis/Contour_cells_adjusted.png')
@@ -153,15 +155,17 @@ def cell_outlines_gen(MF, cp_window):
 
 def spatio_molecular_matrix(MF,
                           tf_obj,
-                          CDs=[0.75],
+                          CDs=[0.8],
                           fetch_ann='online',
                           filter='correlation',
                           tol_fact=-0.2,
+                          fdr_level=0.5,
                           udp_path=None,
                           ms_login=None,
                           ms_password=None,
                           ds_name=None,
-                          fdr_level=0.5):
+                          fluo_path=None,
+                          fluo_nucl_path=None):
 
     if not os.path.exists(MF + 'Analysis/scAnalysis/'):
         os.makedirs(MF + 'Analysis/scAnalysis/')
@@ -174,8 +178,8 @@ def spatio_molecular_matrix(MF,
         fetch_ann=fetch_ann,
         tol_fact=tol_fact,
         filter=filter,
-        fluo_path=MF + 'Analysis/CellProfilerAnalysis/rhodamine_cropped.tiff',
-        fluo_nucl_path=MF + 'Analysis/CellProfilerAnalysis/dapi_cropped.tiff',
+        fluo_path=fluo_path,
+        fluo_nucl_path=fluo_nucl_path,
         ili_csv_file_path=MF + 'Analysis/ili/sm_annotation_detections.csv',
         udp_path=udp_path,
         ms_login=ms_login,
@@ -192,7 +196,7 @@ def spatio_molecular_matrix(MF,
 
 
 def map_intensities_on_cells(MF, tf_obj):
-    spaceM.scAnalysis.scAnalysis_refactored.mapAnn2microCells(
+    spaceM.scAnalysis.color_cells.mapAnn2microCells(
         MF,
         ds_index=None,
         csv_p=MF + 'Analysis/scAnalysis/MORPHnMOL.csv',

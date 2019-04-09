@@ -24,18 +24,14 @@ def prepare_settings():
     return configs
 
 
-def cropFluo_img(im_p, bf_img_p, output_p, coords_p):
-    # im = plt.imread(im_p)
+def cropFluo_img(im_p, bf_img_p, output_p, coords_p, name):
     bf_img = Image.open(bf_img_p)
     im = Image.open(im_p)
     coords = np.load(coords_p).item()
     im_crop = im.crop((int(coords['topLeft'][0]), int(coords['topLeft'][1]),
                        int(coords['topLeft'][0]) + bf_img.size[0],
                        int(coords['topLeft'][1]) + bf_img.size[1]))
-    # im_crop = im[int(coords['topLeft'][1]): int(coords['bottomRight'][1]),
-    #           int(coords['topLeft'][0]): int(coords['bottomRight'][0])]
-    # tiff.imsave(file=output_p + 'AM_cropped_2.tif', data=im_crop)
-    im_crop.save(output_p + 'AM_cropped_2.tif')
+    im_crop.save(output_p + name + '.tif')
 
 
 def scale(arr):
@@ -53,9 +49,11 @@ def crop2coords(coords_p, img_p, save_p, window):
     X, Y = np.load(coords_p)
     X = [int(x) for x in X]
     Y = [int(y) for y in Y]
-    if img_p.split('/')[-1].split('.') == 'tif' or img_p.split('/')[-1].split('.') == 'tiff':
+    if os.path.splitext(img_p)[1] == 'tif' or os.path.splitext(img_p)[1] == 'tiff'\
+            or os.path.splitext(img_p)[1] == '':
         img = tiff.imread(img_p)
-        tiff.imsave(save_p, img[np.min(X)-window:np.max(X)+window, np.min(Y)-window:np.max(Y)+window])
+        if os.path.splitext(img_p)[1] == '':
+            tiff.imsave(save_p + '.tiff', img[np.min(X)-window:np.max(X)+window, np.min(Y)-window:np.max(Y)+window])
     else:
         img = plt.imread(img_p)
         scipy.misc.imsave(save_p, img[np.min(X)-window:np.max(X)+window, np.min(Y)-window:np.max(Y)+window])
@@ -92,34 +90,62 @@ def ion2fluoTF(ion_img):
 def prepare_images(MF, preM_dapi, preM_fluo, composite, window=0):
     if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/'):
         os.makedirs(MF + 'Analysis/CellProfilerAnalysis/')
+
+    if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/'):
+        os.makedirs(MF + 'Analysis/CellProfilerAnalysis/')
+    if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels'):
+        os.makedirs(MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels')
     # preM_fluo should not be checked as it's an optional field
-    check_paths(preM_dapi, composite)
-    preM_dapi_name = os.path.basename(preM_dapi)
-    preM_fluo_name = os.path.basename(preM_fluo)
-    composite_name = os.path.basename(composite)
+    # preM_dapi_name = os.path.basename(preM_dapi)
+    # preM_fluo_name = os.path.basename(preM_fluo)
+    # check_paths(composite)
+    # composite_name = os.path.basename(composite)
 
-    if preM_dapi_name.endswith('.png'):
-        preM_dapi_name = preM_dapi_name[:-4]
-    if preM_fluo_name.endswith('.png'):
-        preM_fluo_name = preM_fluo_name[:-4]
-    if composite_name.endswith('.png'):
-        composite_name = composite_name[:-4]
+    # if preM_dapi_name.endswith('.png'):
+    #     preM_dapi_name = preM_dapi_name[:-4]
+    # if preM_fluo_name.endswith('.png'):
+    #     preM_fluo_name = preM_fluo_name[:-4]
+    # if composite_name.endswith('.png'):
+    #     composite_name = composite_name[:-4]
 
-    crop2coords(
-        MF + 'Analysis/Fiducials/transformedMarks.npy',
-        preM_dapi,
-        MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(preM_dapi_name)),
-        window=window)
+    for file in os.listdir(MF + '/Analysis/StitchedMicroscopy/preMALDI_FLR'):
+        if file.startswith('img_'):
+            crop2coords(
+                MF + 'Analysis/Fiducials/transformedMarks.npy',
+                MF + '/Analysis/StitchedMicroscopy/preMALDI_FLR/' + file,
+                MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels/' +
+                os.path.splitext(file)[0] + '_cropped',
+                window=window)
+    #
+    # crop2coords(
+    #     MF + 'Analysis/Fiducials/transformedMarks.npy',
+    #     preM_dapi,
+    #     MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(preM_dapi_name)),
+    #     window=window)
 
-    crop2coords(
-        MF + 'Analysis/Fiducials/transformedMarks.npy',
-        composite,
-        MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(composite_name)),
-        window=window)
+    # crop2coords(
+    #     MF + 'Analysis/Fiducials/transformedMarks.npy',
+    #     composite,
+    #     MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(composite_name)),
+    #     window=window)
 
-    if preM_fluo:
-        crop2coords(
-            MF + 'Analysis/Fiducials/transformedMarks.npy',
-            preM_fluo,
-            MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(preM_fluo_name)),
-            window=window)
+    # if preM_fluo:
+    #     crop2coords(
+    #         MF + 'Analysis/Fiducials/transformedMarks.npy',
+    #         preM_fluo,
+    #         MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(preM_fluo_name)),
+    #         window=window)
+
+
+def prepared_cropped_img_amfinder(MF, bf_img_p, image_type):
+    for file in os.listdir(MF + '/Analysis/StitchedMicroscopy/{}MALDI_FLR'.format(image_type)):
+        if file.startswith('img_'):
+            try:
+                cropFluo_img(MF + '/Analysis/StitchedMicroscopy/{}MALDI_FLR/'.format(image_type) + file,
+                                   bf_img_p,
+                                   output_p=MF + '/Analysis/gridFit/cropped_{}M_channels/'.format(image_type, image_type),
+                                   coords_p=MF + 'Analysis/gridFit/AM_cropped_coords.npy',
+                                   name=os.path.splitext(file)[0] + '_cropped')
+            except (FileNotFoundError, IOError):
+                raise Exception(
+                    'Fluorescent image cannot be cropped, please make sure that it is in the directory and has a correct name')
