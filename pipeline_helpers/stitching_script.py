@@ -2,6 +2,7 @@ import os, codecs, re, gc
 import tifffile as tiff
 import numpy as np
 from subprocess import call
+from shutil import copyfile
 
 def getMetadataPath(folderToSearch):
     if len(os.listdir(folderToSearch)) > 0:
@@ -38,7 +39,7 @@ def getPixSize(MF, metadata_path):
     return pix_size
 
 
-def TileConfFormat(path, dir_fliplr, tif_files, pix_size, metadata_path):
+def TileConfFormat(path, dir_fliplr, tif_files, pix_size, metadata_path, start_index):
     """Extract the microscope motor stage coordinates at each frame from the metadata text file from the Nikon
     Ti-E microscope (NIS elements software) and reformat into readable format for the Priebisch software algorithm
     from FIJI.
@@ -53,7 +54,7 @@ def TileConfFormat(path, dir_fliplr, tif_files, pix_size, metadata_path):
     data = []
     out_file = open(dir_fliplr + 'TileConfiguration.txt', 'w')
     out_file.write('# Define the number of dimensions we are working on\ndim = 2\n\n# Define the image coordinates\n')
-    i = 0
+    i = start_index
     n_zfill = 1
     if np.shape(tif_files)[0] >= 10:
         n_zfill = 2
@@ -64,20 +65,17 @@ def TileConfFormat(path, dir_fliplr, tif_files, pix_size, metadata_path):
 
     base = re.findall('^(.*)\d{' + str(n_zfill) + '}.tif$', tif_files[0])[0]
     checkpoint = 0
+    tif_files_count = len(tif_files)
     for row in txt_file:
         if row.startswith('Point Name'):
             checkpoint = 1
         if row.startswith('#') and checkpoint == 1:
-
-            if i <= np.shape(tif_files)[0]-1:
-                # print(row.strip().split('\t'))
+            if i <= tif_files_count:
                 data.append(row.strip().split('\t'))
-                data[i][0] = str(i).zfill(n_zfill)
-                data[i][1] = float(data[i][1].replace(',', '.')) / pix_size
-                data[i][2] = float(data[i][2].replace(',', '.')) / pix_size
-                out_file.write(base + '{}.tif; ; ({}, {})\n'.format(data[i][0],data[i][1],data[i][2]))
-                # re.findall('^(.*)(\d{3})$', 'seq000_XY120')
-                # print i
+                data[-1][0] = str(i).zfill(n_zfill)
+                data[-1][1] = float(data[-1][1].replace(',', '.')) / pix_size
+                data[-1][2] = float(data[-1][2].replace(',', '.')) / pix_size
+                out_file.write(base + '{}.tif; ; ({}, {})\n'.format(data[-1][0],data[-1][1],data[-1][2]))
                 i = i+1
         elif row.startswith('Spectral Loop'):
             break
@@ -169,8 +167,29 @@ def callFIJIstitch(dir_fliplr, fiji_path):
     if os.path.exists(base + ".ijm"):
         os.remove(base + ".ijm")
     os.rename(script_file_p, base + ".ijm")
-    call([fiji_path, '-macro', base + ".ijm"])#, stdout = PIPE)
-    # os.remove('C:\\Users\Luca\AppData\Local\Temp\org.scijava.jython.shaded.jline_2_5_3.dll')
+    call([fiji_path, '-macro', base + ".ijm"])
+
+
+def callFIJIstitch_noCompute(dir_in, dir_out, fiji_path):
+    copyfile(src=dir_out + 'TileConfiguration.registered.txt', dst=dir_in + 'TileConfiguration.registered.txt')
+    copyfile(src=dir_out + 'img_t1_z1_c1', dst=dir_out + 'img_t1_z1_c0')
+
+    script_file_p = dir_in + 'stitch_script_2.txt'
+    out_file2 = open(script_file_p, 'w')
+    out_file2.write('run("Grid/Collection stitching", "type=[Positions from file] order=[Defined by TileConfiguration] ' \
+                    'directory={} layout_file=TileConfiguration.registered.txt ' \
+                    'fusion_method=[Linear Blending] regression_threshold=0.30 max/avg_displacement_threshold=2.50 absolute_displacement_threshold=3.50 ' \
+                    'computation_parameters=[Save computation time (but use more RAM)] image_output=[Write to disk] ' \
+                    'output_directory={}");'
+                    '\nrun("Quit");'
+                    .format(dir_in,
+                            dir_out))
+    out_file2.close()
+    base = os.path.splitext(script_file_p)[0]
+    if os.path.exists(base + ".ijm"):
+        os.remove(base + ".ijm")
+    os.rename(script_file_p, base + ".ijm")
+    call([fiji_path, '-macro', base + ".ijm"])
 
 
 def readTileConfReg(dir_fliplr):
@@ -200,7 +219,7 @@ def readTileConfReg(dir_fliplr):
     return dataXscaled, dataYscaled
 
 
-def PixFliplr(tf, file_path, MFAspm):
+def PixFliplr(tf, file_path, MFAspm, transform):
     """Transform images before stitching. This transformation depends on the microscope, the software and the camera used.
 
     Args:
@@ -215,31 +234,24 @@ def PixFliplr(tf, file_path, MFAspm):
     # if not os.path.exists(dir_fliplr):
     #     os.makedirs(dir_fliplr)
     tif_files = []
-    ind = 1
     for item in os.listdir(file_path):
         if item.endswith('.tif'):
             a = tiff.imread(file_path + item)
-            # a = (a/float(np.max(a)))*16385.0
             if np.shape(a.shape)[0] == 2:
-                n_chan=1
-                b = np.zeros((np.max(a.shape), np.max(a.shape)),
-                             dtype=np.uint16)  # lazy hack --> restricts to squared images
-                # b.shape = 1, 1, 1, a.shape[0], a.shape[1], 1
-                b[:, :] = tf(a[:, :])
+                b0 = np.zeros((np.max(a.shape), np.max(a.shape)),
+                             dtype=np.uint16)
+                b0[:, :] = tf(a[:, :], transform)
             else:
-                n_chan = a.shape[0]
-                b = np.zeros((n_chan, a.shape[1], a.shape[2]), dtype=np.uint16) # lazy hack --> restricts to squared images
-                # b.shape =  n_chan, a.shape[1], a.shape[2], 1, 1 # dimensions in XYCZT order
+                if not os.path.exists(MFAspm + 'other_channels/'):
+                    os.mkdir(MFAspm + 'other_channels/')
+                b0 = tf(a[0, :, :], transform)
+                n_chan = a.shape[0] - 1
+                b = np.zeros((n_chan, a.shape[1], a.shape[2]), dtype=np.uint16)
                 for i in range(n_chan):
-                    b[i, :, :] = tf(a[i, :, :])
-
-            tiff.imsave(MFAspm + item,  b)
-            # plt.imsave(arr=b, fname=MFAspm + item)
-            # fi.write_multipage(b, MFAspm + item)
-            # io.imsave(MFAspm + item, b)
+                    b[i, :, :] = tf(a[i + 1, :, :])
+                tiff.imsave(MFAspm + 'other_channels/' + item, b)
+            tiff.imsave(MFAspm + item, b0)
             tif_files.append(item)
-            # print('Processed Image # {}'.format(ind))
-            ind  = ind+1
     return tif_files
 
 
@@ -249,7 +261,9 @@ def stitchMicroscopy(MF,
                      merge_filenames=[],
                      merge_colors=[],
                      preMALDI=True,
-                     postMALDI=True):
+                     postMALDI=True,
+                     transform=None,
+                     start_index=0):
 
     """Function to stitch tile microscopy images into a single one. The function first applies a transformation (tf) on
         each tile images prior to stitching. It also merges defined fields of stitched images together into an RGB .png
@@ -278,21 +292,26 @@ def stitchMicroscopy(MF,
         tif_files = PixFliplr(
             tf,
             MF + 'Input/Microscopy/preMALDI/',
-            MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')
+            MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
+            transform)
 
         if len(tif_files) > 0:
 
             metadata_path = getMetadataPath(MF + 'Input/Microscopy/preMALDI/')
-
             pix_size = getPixSize(MF, metadata_path)
-
             TileConfFormat(path= MF + 'Input/Microscopy/preMALDI/',
                            dir_fliplr=MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
                            tif_files= tif_files,
                            pix_size=pix_size,
-                           metadata_path=metadata_path)
+                           metadata_path=metadata_path,
+                           start_index=start_index)
             gc.collect()
             callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/', fiji_path)
+            callFIJIstitch_noCompute(
+                MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/' + 'other_channels/',
+                MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
+                fiji_path)
+
         print('Pre-MALDI Stitching finished')
 
     if postMALDI:
@@ -303,21 +322,26 @@ def stitchMicroscopy(MF,
         tif_files = PixFliplr(
             tf,
             MF + 'Input/Microscopy/postMALDI/',
-            MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')
+            MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/',
+            transform)
 
         if len(tif_files) > 0:
 
             metadata_path = getMetadataPath(MF + 'Input/Microscopy/postMALDI/')
-
             pix_size = getPixSize(MF, metadata_path)
-
             TileConfFormat(path=MF + 'Input/Microscopy/postMALDI/',
                            dir_fliplr=MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/',
                            tif_files=tif_files,
                            pix_size=pix_size,
-                           metadata_path=metadata_path)
+                           metadata_path=metadata_path,
+                           start_index=start_index)
             gc.collect()
             callFIJIstitch(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/', fiji_path)
+            callFIJIstitch_noCompute(
+                MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/' + 'other_channels/',
+                MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/',
+                fiji_path)
+
         print('Post-MALDI Stitching finished')
 
     if merge_colors != []:
@@ -328,12 +352,23 @@ def stitchMicroscopy(MF,
             save_filename='Composite.png')
 
 
-def tf(img):
-    # return img
-    return np.fliplr(np.flipud(img))
+def tf(img, transform=None):
+    transforms = {
+        'left_right': np.fliplr(img),
+        'upside_down': np.flipud(img),
+        'left_right_upside_down': np.fliplr(np.flipud(img))
+    }
+    if transform:
+        return transforms[transform]
+    else:
+        return img
+    # return np.flipud(img)
+    # return np.fliplr(np.flipud(img))
 
 
 if __name__ == '__main__':
     fiji_path = '/home/renat/EMBL/software/Fiji.app/ImageJ-linux64'
-    MF = '/home/renat/EMBL/vero/test2/'
-    stitchMicroscopy(MF, tf, fiji_path)
+    MF = '/home/renat/EMBL/Sharaz_images/1_1mM_Tet_UNW_DMEM/'
+    transform = '' #  left right = lr, left right + upside-down = lr_up, '' = no trasnform
+    st_index = 1
+    stitchMicroscopy(MF, tf, fiji_path, transform, start_index=st_index)
