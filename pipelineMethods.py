@@ -187,7 +187,7 @@ def spatio_molecular_matrix(MF,
         ds_name=ds_name,
         fdr_level=fdr_level)
 
-    spaceM.scAnalysis.scAnalysis_refactored.mergeMORPHnMOL(
+    spaceM.scAnalysis.mergeMORPHnMOL.mergeMORPHnMOL(
         MF,
         CDs=CDs,
         fetch_ann=fetch_ann,
