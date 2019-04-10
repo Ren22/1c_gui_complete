@@ -33,7 +33,7 @@ logging.info("Running spaceM v0.1")
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
-        self.step = 4
+        self.step = 7
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'gen_settings'))
         self.setup_tabs()
@@ -321,6 +321,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             self.set_btns_static_state()
             self.thread_6.terminate()
         elif self.step == 8:
+            self.set_btns_static_state()
             self.thread_7.terminate()
 
     def update_pb(self, val):

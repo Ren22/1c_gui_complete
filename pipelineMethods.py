@@ -130,13 +130,13 @@ def grab_ms_data(MF, ili_fdr=0.5, ds_name=None, db_name=None, email=None, passwo
         password=password)
 
 
-def cell_segmentation(MF, pipeline_file):
+def cell_segmentation(MF, cp_path_exe, pipeline_file):
 
     if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/'):
         os.makedirs(MF + 'Analysis/CellProfilerAnalysis/')
 
     headless = True if len(pipeline_file) > 0 else False
-    spaceM.scAnalysis.Segmentation.callCP(MF + 'Analysis/', pipeline_file, headless = headless)
+    spaceM.scAnalysis.Segmentation.callCP(MF + 'Analysis/', pipeline_file, cp_path_exe=cp_path_exe, headless = headless)
 
 
 def cell_distrib(MF, window):
@@ -155,7 +155,7 @@ def cell_outlines_gen(MF, cp_window):
 
 def spatio_molecular_matrix(MF,
                           tf_obj,
-                          CDs=[0.8],
+                          CDs=[0.88],
                           fetch_ann='online',
                           filter='correlation',
                           tol_fact=-0.2,

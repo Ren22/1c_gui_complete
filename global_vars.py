@@ -18,7 +18,7 @@ class GlobalVars:
         self.maldiMetadata = ''
 
         self.database = 'ChEBI-2018-01'
-        self.fdr = 0.5
+        self.fdr = 0.1
 
         '''Tab Ablation mark finder'''
         self.tab_amf_fftIterations = 20
@@ -85,6 +85,5 @@ class GlobalVars:
 
     def set_MS_password(self, val):
         self.tab_gms_MSPass = val
-
 
 global_vars = GlobalVars()

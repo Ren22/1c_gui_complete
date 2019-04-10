@@ -1,10 +1,12 @@
 import os
 
-
 class spaceMError(Exception):
     def __init__(self, msg=None):
         self.message = msg
 
+class windowsOSWarning(Exception):
+    def __init__(self, msg=None):
+        self.message = msg
 
 def check_paths(*paths):
     for path in paths:

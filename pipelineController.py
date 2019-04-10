@@ -153,7 +153,7 @@ class CellSegment():
     def step1(self):
         self.vars.get_paths()
         print("Cell profiler for cell segmentation started")
-        pipelineMethods.cell_segmentation(self.vars.MF, self.vars.CP_PIPELINE)
+        pipelineMethods.cell_segmentation(self.vars.MF, self.vars.CP, self.vars.CP_PIPELINE)
         print("Cell profiler segmentation finished")
 
     def step2(self):
