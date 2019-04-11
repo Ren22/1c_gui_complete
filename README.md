@@ -9,7 +9,7 @@ or install spaceM as a package to your system with pip. If both repositories are
 <strong><em>Common to all systems:</em></strong>
 
 - Use provided `requirements.txt` file from `./env_files` and pip install it
-- Install [metaspace](https://github.com/metaspace2020/metaspace/tree/master/metaspace/python-client) package from git(instructions):
+- Install [metaspace](https://github.com/metaspace2020/metaspace/tree/master/metaspace/python-client) package from github
 - Install [Fiji 2014 June 02](https://imagej.net/Fiji/Downloads)
 </ul>
 <strong><em>Windows:</em></strong>
