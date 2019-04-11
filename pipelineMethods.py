@@ -40,7 +40,7 @@ def ablation_mark_filter(MF,
         os.makedirs(MF + '/Analysis/gridFit/cropped_postM_channels')
     utils.prepared_cropped_img_amfinder(MF, bf_img_p, 'post')
     # print(iterations, gblur_sigma)
-
+    #
     spaceM.AMFinder.gridfit.GridFit(MF,
                                     postMaldiImgPath=postMaldiImgPath,
                                     iterations=iterations,

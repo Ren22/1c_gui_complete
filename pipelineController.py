@@ -119,9 +119,9 @@ class RegisterPrePostMaldi():
         # For this step access to internet and Metaspace is needed
         # The metaspace package is used to pull ion images
         # Check if the package is not updated -> update it
-        print("Registration of Pre and Post maldi fidicuals, alignment, and metaspace based annotation started")
+        print("Registration of Pre and Post maldi fidicuals, alignment")
         pipelineMethods.registration(self.vars.MF)
-        print("Registration of Pre and Post maldi fidicuals, alignment, and metaspace based annotation finished")
+        print("Registration of Pre and Post maldi fidicuals, alignment")
 
 
 class GrabMsData():
