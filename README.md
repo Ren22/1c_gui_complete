@@ -27,7 +27,7 @@ Install [Cellprofiler 3.1.8](https://cellprofiler.org/releases/)
 Install [Cellprofiler 3.1.3](https://github.com/CellProfiler/CellProfiler/wiki/Conda-Installation) into the conda environment 
 
 <strong><em>Requirements:</em></strong>  
-As datasets can be quite heavy make sure you are using minimum:
+As datasets can be quite heavy to process make sure you are using minimum:
 - RAM: >=16 Gb
 - CPUs: >=4
     
