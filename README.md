@@ -1,14 +1,21 @@
+# Single cell analysis GUI #
+The tool provides an interactive GUI that wraps up computatinal methods for single cell analysis into a step by step pipeline. Reference: https://www.biorxiv.org/content/10.1101/510222v1
+
 ## Installation:
+
+GUI:
 
 `git clone https://github.com/Ren22/1c_gui_complete.git`
 
+Main package with the computatioanal methods:
+
 `git clone https://git.embl.de/nigmetzi/spaceM.git`
 
-or install spaceM as a package to your system with pip. If both repositories are cloned put both folders into 1 directory next to each other.
+Put both directories into one next to each other.
 
 <strong><em>Common to all systems:</em></strong>
 
-- Use provided `requirements.txt` file from `./env_files` and pip install it
+- Use provided `requirements.txt` file from `./env_files` and install it with pip
 - Install [metaspace](https://github.com/metaspace2020/metaspace/tree/master/metaspace/python-client) package from github
 - Install [Fiji 2014 June 02](https://imagej.net/Fiji/Downloads)
 </ul>
