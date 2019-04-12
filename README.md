@@ -30,6 +30,3 @@ Install [Cellprofiler 3.1.3](https://github.com/CellProfiler/CellProfiler/wiki/C
 As datasets can be quite heavy to process make sure you are using minimum:
 - RAM: >=16 Gb
 - CPUs: >=4
-    
-<strong><em>Check out more details and demo demonstration on:</em></strong>  
-https://www.evernote.com/shard/s329/sh/ee15d31d-dc98-47e9-ac9b-cd6ec70eb600/59a06ef8ec67a62b231598f6ec7b6d3e
