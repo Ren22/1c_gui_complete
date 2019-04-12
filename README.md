@@ -1,5 +1,5 @@
 # Single cell analysis GUI #
-The tool provides an interactive GUI that wraps up computatinal methods for single cell analysis into a step by step pipeline. Reference: https://www.biorxiv.org/content/10.1101/510222v1
+The tool provides an interactive GUI that wraps up computational methods for single cell analysis into a step by step pipeline. Reference: https://www.biorxiv.org/content/10.1101/510222v1
 
 ## Installation:
 
@@ -7,7 +7,7 @@ GUI:
 
 `git clone https://github.com/Ren22/1c_gui_complete.git`
 
-Main package with the computatioanal methods:
+Main package with the computational methods:
 
 `git clone https://git.embl.de/nigmetzi/spaceM.git`
 
