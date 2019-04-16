@@ -527,7 +527,7 @@ class Ui_MainWindow(object):
         self.label_75.setObjectName("label_75")
         self.gridLayout_45.addWidget(self.label_75, 2, 0, 1, 1)
         self.tab_gms_lineEditMSDb = QtWidgets.QListWidget(self.groupBox_20)
-        self.tab_gms_lineEditMSDb.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.tab_gms_lineEditMSDb.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tab_gms_lineEditMSDb.setFlow(QtWidgets.QListView.TopToBottom)
         self.tab_gms_lineEditMSDb.setProperty("isWrapping", False)
         self.tab_gms_lineEditMSDb.setLayoutMode(QtWidgets.QListView.SinglePass)
@@ -754,7 +754,7 @@ class Ui_MainWindow(object):
         self.label_2.setBuddy(self.label_2)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(0)
         self.tab_gms_lineEditMSDb.setCurrentRow(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
