@@ -1,22 +1,18 @@
 {
-    "inp_path":  "/home/renat/EMBL/Sharaz_images/rhodamin",
+    "inp_path":  "/home/renat/EMBL/vero/Well2",
     "python_path":  "/home/renat/miniconda3/bin/python",
     "cellprofilerPath": "",
 
-    "stitchedImgPreMPath": "/home/renat/EMBL/Sharaz_images/rhodamin/stitched/pre/bf",
-    "stitchedImgPostMPath": "/home/renat/EMBL/Sharaz_images/rhodamin/stitched/post/bf",
-    "preMaldiDapi": "/home/renat/EMBL/Sharaz_images/rhodamin/stitched/pre/dapi",
-    "postMaldiDapi": "/home/renat/EMBL/Sharaz_images/rhodamin/stitched/post/dapi",
-    "preMaldiSample": "/home/renat/EMBL/Sharaz_images/rhodamin/stitched/pre/rhodamine",
-    "compositeImgPath": "/home/renat/EMBL/Sharaz_images/rhodamin/stitched/Composite.png",
+    "stitchedImgPreMPath": "/home/renat/EMBL/vero/Well2/Analysis/StitchedMicroscopy/preMALDI_FLR/img_t1_z1_c1",
+    "stitchedImgPostMPath": "/home/renat/EMBL/vero/Well2/Analysis/StitchedMicroscopy/postMALDI_FLR/img_t1_z1_c1",
+    "postMaldiDapi": "",
+    "compositeImgPath": "",
     "cpPipeLine": "",
 
-    "udpFile": "/home/renat/EMBL/Sharaz_images/rhodamin/191118_RhodaminetTop_p50_s50_DHB_NEG.RAW/191118_Top_Rhodamine_p50_s50_DHB_P.RAW.UDP",
-    "imzMLName": "191118_Top_Rhodamine_p50_s50_DHB_P.RAW",
-    "maldiMetadata": "/home/renat/EMBL/Sharaz_images/rhodamin/Post Maldi/Top Square/out.txt",
+    "udpFile": "/home/renat/EMBL/vero/Well2/Metafiles/Slice3.UDP",
+    "maldiMetadata": "/home/renat/EMBL/vero/Well2/Input/Microscopy/postMALDI/Well2.txt",
 
-    "MSLogin": "",
-    "MSPass": "",
-    "database": "ChEBI-2018-01",
+    "MSDsName": "",
+    "database": "SwissLipids-2018-02-02",
     "fdr": 0.2
 }

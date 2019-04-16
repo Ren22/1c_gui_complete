@@ -19,8 +19,3 @@ class FidFilterWorker(QObject):
         self.progressBarSig.emit(40)
         self.incrementStepSig.emit()
         self.changeTabSig.emit()
-        # self.incrementStepSig.emit()
-        # self.changeTabSig.emit()
-
-    # def work_2(self):
-

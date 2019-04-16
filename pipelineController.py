@@ -1,7 +1,7 @@
 import os
 import pipelineMethods, utils
 from subprocess import run, call
-from global_vars import global_vars
+from global_vars.global_vars import global_vars
 from pipeline_helpers import abl_mark_handler, ili_analog
 
 SETTINGS = utils.prepare_settings()
@@ -12,6 +12,7 @@ class Analysis():
         self.get_paths()
 
     def get_paths(self):
+        super(Analysis, self).__init__()
         ''' GUI general settings'''
         self.MF = global_vars.inpPath + '/'
         self.PYTHON_PATH = global_vars.pythonPath
@@ -19,36 +20,38 @@ class Analysis():
 
         self.STITCHED_PRE = global_vars.stitchedImgPreMPath
         self.STITCHED_POST = global_vars.stitchedImgPostMPath
-        self.PREM_DAPI = global_vars.preMaldiDapi
-        self.POSTM_DAPI = global_vars.postMaldiDapi
-        self.PREM_FLUO = global_vars.preMaldiSample
-        self.COMPOSITE_PNG = global_vars.compositeImgPath
-        self.CP_PIPELINE = global_vars.cpPipeLine
+        # self.PREM_DAPI = global_vars.preMaldiDapi
+        # self.PREM_FLUO = global_vars.preMaldiSample
+        # self.COMPOSITE_PNG = global_vars.compositeImgPath
 
         self.UDP_FILE = global_vars.udpFile
-        self.IMZML_FILENAME = global_vars.imzMLName
         self.MALDI_METADATA = global_vars.maldiMetadata
 
+        '''AM FINDER TAB'''
+        self.TAB_AMF_MATRIX_TYPE = global_vars.tab_amf_matrixType
+        self.TAB_AMF_ITERATIONS = global_vars.tab_amf_fftIterations
+        self.TAB_AMF_GBLUR_SIGMA = global_vars.tab_amf_gblurSigma
+        self.TAB_AMF_iFFT_IMAGE_P = global_vars.tab_amf_ifftImage
+        self.TAB_AMF_MAX_DIST = global_vars.tab_amf_maxDist
+        self.TAB_AMF_POSTM_DAPI = global_vars.tab_amf_postMaldiDapi
+        # self.TAB_AMF_SHOW_RES = global_vars.tab_amf_showRes
+#
+        '''CELL SEGMENTATION'''
+        self.CP_PIPELINE = global_vars.cpPipeLine
+
+        '''GRAB METASPACE DATA'''
         self.MS_LOGIN = global_vars.tab_gms_MSLogin
         self.MS_PASS = global_vars.tab_gms_MSPass
-        self.DATABASE = global_vars.database
-        self.FDR = global_vars.fdr
+        self.MSDATA_FILENAME = global_vars.tab_gms_msDSName
+        self.DATABASE = global_vars.tab_gms_database
+        self.FDR = global_vars.tab_gms_fdr
 
+        '''EXTRA'''
         self.MFA = self.MF + 'Analysis/'
         self.AM_CURATOR = abl_mark_handler.__file__
         self.SPOT_FINDER = self.MFA + 'SpotFinder/'
         self.GRIDFIT = self.MFA + 'gridFit/'
         self.ILI = ili_analog.__file__
-
-        ''' GUI AM Finder tab'''
-        self.TAB_AMF_ITERATIONS = global_vars.tab_amf_fftIterations
-        self.TAB_AMF_GBLUR_SIGMA = global_vars.tab_amf_gblurSigma
-        self.TAB_AMF_SHOW_RES = global_vars.tab_amf_showRes
-        self.TAB_AMF_iFFT_IMAGE_P = False
-        self.TAB_AMF_MATRIX_TYPE = 'DAN'
-
-        ''' GUI grab MS data tab'''
-#         TODO: defing self.TAB_GMS_=...
 
 
 class FindAMinPM():
@@ -65,23 +68,40 @@ class FindAMinPM():
         print('cropPMimage finished')
 
     def step2(self):
+        print('Cropping of other channels started')
         self.vars.get_paths()
-        if not os.path.exists(self.vars.GRIDFIT):
-            os.makedirs(self.vars.GRIDFIT)
+        if not os.path.exists(self.vars.MF + '/Analysis/gridFit/cropped_postM_channels'):
+            os.makedirs(self.vars.MF + '/Analysis/gridFit/cropped_postM_channels')
+        utils.prepared_cropped_img_amfinder(self.vars.MF, "{}AM_cropped.tif".format(self.vars.GRIDFIT), 'post')
+        print('Cropping of other channels finished')
+        # Croping here
+
+    def step3(self):
+        self.vars.get_paths()
+        print('Cropping and preparing dapi channel image started')
+        if self.vars.TAB_AMF_POSTM_DAPI:
+            utils.cropFluo_img(self.vars.TAB_AMF_POSTM_DAPI,
+                                   bf_img_p="{}AM_cropped.tif".format(self.vars.GRIDFIT),
+                                   output_p=self.vars.GRIDFIT + '/',
+                                   coords_p=self.vars.MF + 'Analysis/gridFit/AM_cropped_coords.npy',
+                                   name='AM_cropped_2')
+        print('Cropping and preparing dapi channel image finished')
+
         print('Ablation mark finding and filtering started')
         pipelineMethods.ablation_mark_filter(
             MF=self.vars.MF,
             postMaldiImgPath=self.vars.STITCHED_POST,
-            postMFluoOutputPath=self.vars.GRIDFIT,
-            postMFluoPath=self.vars.POSTM_DAPI,
+            # postMFluoOutputPath=self.vars.GRIDFIT,
+            postMFluoPath="{}AM_cropped_2.tif".format(self.vars.GRIDFIT),
             UDPpath=self.vars.UDP_FILE,
             maldiMetadataPath=self.vars.MALDI_METADATA,
-            bf_img_p="{}AM_cropped.tif".format(self.vars.GRIDFIT),
+            # bf_img_p="{}AM_cropped.tif".format(self.vars.GRIDFIT),
             iterations=self.vars.TAB_AMF_ITERATIONS,
             gblur_sigma=self.vars.TAB_AMF_GBLUR_SIGMA,
-            show_results=self.vars.TAB_AMF_SHOW_RES,
+            # show_results=self.vars.TAB_AMF_SHOW_RES,
             iFFTImage_p=self.vars.TAB_AMF_iFFT_IMAGE_P,
             matrix_type=self.vars.TAB_AMF_MATRIX_TYPE,
+            maxDist=self.vars.TAB_AMF_MAX_DIST,
             window=0)
         print('Ablation mark finding and filtering finished')
 
@@ -119,9 +139,9 @@ class RegisterPrePostMaldi():
         # For this step access to internet and Metaspace is needed
         # The metaspace package is used to pull ion images
         # Check if the package is not updated -> update it
-        print("Registration of Pre and Post maldi fidicuals, alignment, and metaspace based annotation started")
+        print("Registration of Pre and Post maldi fidicuals, alignment started")
         pipelineMethods.registration(self.vars.MF)
-        print("Registration of Pre and Post maldi fidicuals, alignment, and metaspace based annotation finished")
+        print("Registration of Pre and Post maldi fidicuals, alignment finished")
 
 
 class GrabMsData():
@@ -133,7 +153,7 @@ class GrabMsData():
         pipelineMethods.grab_ms_data(
             self.vars.MF,
             ili_fdr=self.vars.FDR,
-            ds_name=self.vars.IMZML_FILENAME,
+            ds_name=self.vars.MSDATA_FILENAME,
             db_name=self.vars.DATABASE,
             email=self.vars.MS_LOGIN,
             password=self.vars.MS_PASS)
@@ -147,13 +167,13 @@ class CellSegment():
         self.vars.get_paths()
         print("Images are cropped and are being prepared for cellprofiler")
         # TODO : these window 100 vals are very cryptic and not easy to understand
-        utils.prepare_images(self.vars.MF, self.vars.PREM_DAPI, self.vars.PREM_FLUO, self.vars.COMPOSITE_PNG, window=100)
+        utils.prepare_images(self.vars.MF, window=100)
         print("Images preparation is done")
 
     def step1(self):
         self.vars.get_paths()
         print("Cell profiler for cell segmentation started")
-        pipelineMethods.cell_segmentation(self.vars.MF, self.vars.CP_PIPELINE)
+        pipelineMethods.cell_segmentation(self.vars.MF, self.vars.CP, self.vars.CP_PIPELINE)
         print("Cell profiler segmentation finished")
 
     def step2(self):
@@ -186,6 +206,7 @@ class CellSegment():
         call(execut_string, shell=True)
         print("Ablation marks analyzer finished")
 
+
 class GenerateCSV():
     def __init__(self):
         self.vars = Analysis()
@@ -193,12 +214,12 @@ class GenerateCSV():
     def step1(self):
         self.vars.get_paths()
         pipelineMethods.spatio_molecular_matrix(self.vars.MF,
-                              tf_obj=utils.ion2fluoTF,
-                              udp_path=self.vars.UDP_FILE,
-                              ms_login=self.vars.MS_LOGIN,
-                              ms_password=self.vars.MS_PASS,
-                              ds_name=self.vars.IMZML_FILENAME,
-                              fdr_level=self.vars.FDR)
+                                                tf_obj=utils.ion2fluoTF,
+                                                udp_path=self.vars.UDP_FILE,
+                                                ms_login=self.vars.MS_LOGIN,
+                                                ms_password=self.vars.MS_PASS,
+                                                ds_name=self.vars.MSDATA_FILENAME,
+                                                fdr_level=self.vars.FDR)
 
     def step2(self):
         self.vars.get_paths()

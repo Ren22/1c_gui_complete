@@ -3,6 +3,15 @@ import tifffile as tiff
 import numpy as np
 from subprocess import call
 from shutil import copyfile
+from pathlib import Path, PureWindowsPath
+from sys import platform
+
+def def_platform_path(path):
+    if platform == "win32":
+        path = str(PureWindowsPath(path))
+    else:
+        path = Path(path)
+    return path
 
 def getMetadataPath(folderToSearch):
     if len(os.listdir(folderToSearch)) > 0:
@@ -11,7 +20,7 @@ def getMetadataPath(folderToSearch):
                 with codecs.open(folderToSearch + row, 'r', 'utf-16') as txt_file:
                     data = txt_file.readlines()
                     if len(re.findall('Image Fields', data[0])) > 0:
-                        return folderToSearch + row
+                        return Path(folderToSearch + row)
     else:
         return 0
     raise Exception('Metadata file was not found at {}'.format(folderToSearch))
@@ -24,13 +33,13 @@ def getPixSize(MF, metadata_path):
         pix_size (float): pixel size in um.
 
     """
-    for row in os.listdir(MF + 'Input/Microscopy/preMALDI/'):
+    for row in os.listdir(Path(MF + 'Input/Microscopy/preMALDI/')):
         if row.endswith('.txt'):
             os.path.basename(row)
-            with codecs.open(MF + 'Input/Microscopy/preMALDI/' + row, 'r', 'utf-16') as txt_file:
+            with codecs.open(Path(MF + 'Input/Microscopy/preMALDI/' + row), 'r', 'utf-16') as txt_file:
                 data = txt_file.readlines()
                 if len(re.findall('Image Fields', data[0])) > 0:
-                    metadata_path = MF + 'Input/Microscopy/preMALDI/' + row
+                    metadata_path = Path(MF + 'Input/Microscopy/preMALDI/' + row)
     pix_size = 0.73
     txt_file = codecs.open(metadata_path, 'r', 'utf-16')
     for row in txt_file:
@@ -123,11 +132,11 @@ def callFIJImergeChannels(base_path,
             filenames[i])
     string2 = string2 + 'create'
 
-    script_file_p = base_path + 'mergeRedGray_script.txt'
+    script_file_p = Path(base_path + 'mergeRedGray_script.txt')
     base = os.path.splitext(script_file_p)[0]
 
-    if os.path.exists(base_path + 'mergeRedGray_script.ijm'):
-        os.remove(base_path + 'mergeRedGray_script.ijm')
+    if os.path.exists(Path(base_path + 'mergeRedGray_script.ijm')):
+        os.remove(Path(base_path + 'mergeRedGray_script.ijm'))
 
     out_file2 = open(script_file_p , 'w')
     out_file2.write(string1 + 'run("Merge Channels...", "{}")\
@@ -137,8 +146,8 @@ def callFIJImergeChannels(base_path,
                             base_path + save_filename))
     out_file2.close()
 
-    if os.path.exists(base + ".ijm"):
-        os.remove(base + ".ijm")
+    if os.path.exists(Path(base + ".ijm")):
+        os.remove(Path(base + ".ijm"))
     os.rename(script_file_p, base + ".ijm")
     call([fiji_path, '-macro', base + ".ijm"])#, stdout = PIPE)
 
@@ -152,6 +161,7 @@ def callFIJIstitch(dir_fliplr, fiji_path):
 
     """
     script_file_p = dir_fliplr + 'stitch_script.txt'
+    dir_fliplr = PureWindowsPath(dir_fliplr).as_posix()
     out_file2 = open(script_file_p , 'w')
     out_file2.write('run("Grid/Collection stitching", \
     "type=[Positions from file] order=[Defined by TileConfiguration] directory={} \
@@ -167,14 +177,20 @@ def callFIJIstitch(dir_fliplr, fiji_path):
     if os.path.exists(base + ".ijm"):
         os.remove(base + ".ijm")
     os.rename(script_file_p, base + ".ijm")
-    call([fiji_path, '-macro', base + ".ijm"])
+    try:
+        call([fiji_path, '-macro', base + ".ijm"])
+    except PermissionError:
+        raise Exception('Please provide ImageJ executable, most probably directory path was provided')
 
 
 def callFIJIstitch_noCompute(dir_in, dir_out, fiji_path):
-    copyfile(src=dir_out + 'TileConfiguration.registered.txt', dst=dir_in + 'TileConfiguration.registered.txt')
-    copyfile(src=dir_out + 'img_t1_z1_c1', dst=dir_out + 'img_t1_z1_c0')
+    copyfile(src=Path(dir_out + 'TileConfiguration'
+                                '.registered.txt'), dst=Path(dir_in + 'TileConfiguration.registered.txt'))
+    copyfile(src=Path(dir_out + 'img_t1_z1_c1'), dst=Path(dir_out + 'img_t1_z1_c0'))
 
     script_file_p = dir_in + 'stitch_script_2.txt'
+    dir_in = PureWindowsPath(dir_in).as_posix()
+    dir_out = PureWindowsPath(dir_out).as_posix()
     out_file2 = open(script_file_p, 'w')
     out_file2.write('run("Grid/Collection stitching", "type=[Positions from file] order=[Defined by TileConfiguration] ' \
                     'directory={} layout_file=TileConfiguration.registered.txt ' \
@@ -242,8 +258,8 @@ def PixFliplr(tf, file_path, MFAspm, transform):
                              dtype=np.uint16)
                 b0[:, :] = tf(a[:, :], transform)
             else:
-                if not os.path.exists(MFAspm + 'other_channels/'):
-                    os.mkdir(MFAspm + 'other_channels/')
+                if not os.path.exists(Path(MFAspm + 'other_channels/')):
+                    os.mkdir(Path(MFAspm + 'other_channels/'))
                 b0 = tf(a[0, :, :], transform)
                 n_chan = a.shape[0] - 1
                 b = np.zeros((n_chan, a.shape[1], a.shape[2]), dtype=np.uint16)
@@ -261,7 +277,7 @@ def stitchMicroscopy(MF,
                      merge_filenames=[],
                      merge_colors=[],
                      preMALDI=True,
-                     postMALDI=True,
+                     postMALDI=False,
                      transform=None,
                      start_index=0):
 
@@ -280,14 +296,14 @@ def stitchMicroscopy(MF,
     Data are stored in MF + /Analysis/StitchedMicroscopy/
     """
 
-    if not os.path.exists(MF + 'Analysis/'):
-        os.makedirs(MF + 'Analysis/')
-        os.mkdir(MF + 'Analysis/StitchedMicroscopy/')
+    if not os.path.exists(Path(MF + 'Analysis/')):
+        os.makedirs(Path(MF + 'Analysis/'))
+        os.mkdir(Path(MF + 'Analysis/StitchedMicroscopy/'))
 
     if preMALDI:
 
-        if not os.path.exists(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/'):
-            os.makedirs(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')
+        if not os.path.exists(Path(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/')):
+            os.makedirs(Path(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/'))
 
         tif_files = PixFliplr(
             tf,
@@ -299,7 +315,7 @@ def stitchMicroscopy(MF,
 
             metadata_path = getMetadataPath(MF + 'Input/Microscopy/preMALDI/')
             pix_size = getPixSize(MF, metadata_path)
-            TileConfFormat(path= MF + 'Input/Microscopy/preMALDI/',
+            TileConfFormat(path=MF + 'Input/Microscopy/preMALDI/',
                            dir_fliplr=MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
                            tif_files= tif_files,
                            pix_size=pix_size,
@@ -316,8 +332,8 @@ def stitchMicroscopy(MF,
 
     if postMALDI:
 
-        if not os.path.exists(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/'):
-            os.makedirs(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')
+        if not os.path.exists(Path(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/')):
+            os.makedirs(Path(MF + 'Analysis/StitchedMicroscopy/postMALDI_FLR/'))
 
         tif_files = PixFliplr(
             tf,
@@ -343,13 +359,13 @@ def stitchMicroscopy(MF,
                 fiji_path)
 
         print('Post-MALDI Stitching finished')
-
-    if merge_colors != []:
-        callFIJImergeChannels(
-            base_path=MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/',
-            colors=merge_colors,
-            filenames=merge_filenames,
-            save_filename='Composite.png')
+    # TODO: Remove mergin as it's not part of automated pipeline anymore
+    # if merge_colors != []:
+    #     callFIJImergeChannels(
+    #         base_path=Path(MF + 'Analysis/StitchedMicroscopy/preMALDI_FLR/'),
+    #         colors=merge_colors,
+    #         filenames=merge_filenames,
+    #         save_filename='Composite.png')
 
 
 def tf(img, transform=None):
@@ -369,6 +385,11 @@ def tf(img, transform=None):
 if __name__ == '__main__':
     fiji_path = '/home/renat/EMBL/software/Fiji.app/ImageJ-linux64'
     MF = '/home/renat/EMBL/Sharaz_images/1_1mM_Tet_UNW_DMEM/'
-    transform = '' #  left_right = lr, left right + upside-down = lr_up, '' = no trasnform
-    st_index = 1
+    # Possible transformations to the tiled images
+    # transform = 'left_right'
+    # transform = 'upside_down'
+    # transform = 'left_right_upside_down'
+    # transform = '' # will produce no transformation
+    transform = ''
+    st_index = 1 # Starting index of tiles
     stitchMicroscopy(MF, tf, fiji_path, transform, start_index=st_index)

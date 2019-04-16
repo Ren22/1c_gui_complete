@@ -34,14 +34,7 @@ def cropFluo_img(im_p, bf_img_p, output_p, coords_p, name):
     im_crop.save(output_p + name + '.tif')
 
 
-def scale(arr):
-    """Scale array between 0 and 1"""
-    return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
 
-
-def contrast(arr, min, max=1.0):
-    """Clip array between min and max values"""
-    return np.clip(arr, np.percentile(arr, min*100), np.percentile(arr, max*100))
 
 
 def crop2coords(coords_p, img_p, save_p, window):
@@ -87,7 +80,7 @@ def ion2fluoTF(ion_img):
     return ion_img
 
 
-def prepare_images(MF, preM_dapi, preM_fluo, composite, window=0):
+def prepare_images(MF, window=0):
     if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/'):
         os.makedirs(MF + 'Analysis/CellProfilerAnalysis/')
 
@@ -95,19 +88,6 @@ def prepare_images(MF, preM_dapi, preM_fluo, composite, window=0):
         os.makedirs(MF + 'Analysis/CellProfilerAnalysis/')
     if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels'):
         os.makedirs(MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels')
-    # preM_fluo should not be checked as it's an optional field
-    # preM_dapi_name = os.path.basename(preM_dapi)
-    # preM_fluo_name = os.path.basename(preM_fluo)
-    # check_paths(composite)
-    # composite_name = os.path.basename(composite)
-
-    # if preM_dapi_name.endswith('.png'):
-    #     preM_dapi_name = preM_dapi_name[:-4]
-    # if preM_fluo_name.endswith('.png'):
-    #     preM_fluo_name = preM_fluo_name[:-4]
-    # if composite_name.endswith('.png'):
-    #     composite_name = composite_name[:-4]
-
     for file in os.listdir(MF + '/Analysis/StitchedMicroscopy/preMALDI_FLR'):
         if file.startswith('img_'):
             crop2coords(
@@ -116,25 +96,6 @@ def prepare_images(MF, preM_dapi, preM_fluo, composite, window=0):
                 MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels/' +
                 os.path.splitext(file)[0] + '_cropped',
                 window=window)
-    #
-    # crop2coords(
-    #     MF + 'Analysis/Fiducials/transformedMarks.npy',
-    #     preM_dapi,
-    #     MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(preM_dapi_name)),
-    #     window=window)
-
-    # crop2coords(
-    #     MF + 'Analysis/Fiducials/transformedMarks.npy',
-    #     composite,
-    #     MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(composite_name)),
-    #     window=window)
-
-    # if preM_fluo:
-    #     crop2coords(
-    #         MF + 'Analysis/Fiducials/transformedMarks.npy',
-    #         preM_fluo,
-    #         MF + 'Analysis/CellProfilerAnalysis/{}_cropped.tiff'.format(os.path.basename(preM_fluo_name)),
-    #         window=window)
 
 
 def prepared_cropped_img_amfinder(MF, bf_img_p, image_type):

@@ -15,5 +15,6 @@ class GenCSVWorker(QObject):
 
     def work_1(self):
         self.gen_csv_worker.step1()
+        self.progressBarSig.emit(95)
         self.gen_csv_worker.step2()
         self.progressBarSig.emit(100)
