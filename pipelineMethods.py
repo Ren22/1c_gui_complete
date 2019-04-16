@@ -10,14 +10,15 @@ def ablation_mark_filter(MF,
                          postMaldiImgPath,
                          UDPpath,
                          maldiMetadataPath,
-                         bf_img_p,
+                         # bf_img_p,
                          iterations,
                          gblur_sigma,
-                         show_results,
                          iFFTImage_p,
-                         postMFluoOutputPath,
+                         # postMFluoOutputPath,
                          postMFluoPath,
                          matrix_type,
+                         maxDist,
+                         show_results=False,
                          marks_check=True,
                          window=0):
     """Filters ablation marks. First by re-running the ablation mark detection on the cropped stitched images where the
@@ -32,24 +33,16 @@ def ablation_mark_filter(MF,
     Data are stored in MF + /Analysis/gridFit/
     Visualization are stored in MF + /Analysis/gridFit/marks_check/
     """
-    # if not os.path.exists(MF + '/Analysis/gridFit/cropped_preM_channels'):
-    #     os.makedirs(MF + '/Analysis/gridFit/cropped_preM_channels')
-    # utils.prepared_cropped_img_amfinder(MF, bf_img_p, 'pre')
 
-    if not os.path.exists(MF + '/Analysis/gridFit/cropped_postM_channels'):
-        os.makedirs(MF + '/Analysis/gridFit/cropped_postM_channels')
-    utils.prepared_cropped_img_amfinder(MF, bf_img_p, 'post')
-    # print(iterations, gblur_sigma)
-    #
     spaceM.AMFinder.gridfit.GridFit(MF,
-                                    postMaldiImgPath=postMaldiImgPath,
                                     iterations=iterations,
                                     gblur_sigma=gblur_sigma,
                                     UDPpath=UDPpath,
                                     matrix_type=matrix_type,
                                     maldiMetadataPath=maldiMetadataPath,
                                     show_results=show_results,
-                                    iFFTImage_p=iFFTImage_p)
+                                    iFFTImage_p=iFFTImage_p,
+                                    postMFluoPath=postMFluoPath)
     if marks_check:
         if not os.path.exists(MF + 'Analysis/gridFit/marks_check/'):
             os.makedirs(MF + 'Analysis/gridFit/marks_check/')
@@ -87,7 +80,10 @@ def ablation_mark_filter(MF,
     if not os.path.exists(MF + 'Analysis/gridFit/marksMask.npy'):
         # Provide maxDist=17 for the rho 2 exp
         # spaceM.Registration.AblationMarkFinder.regionGrowingAblationMarks(MF, window=window, maxDist=17)
-        spaceM.RegionGrowAlg.reggrow_am_marks.regionGrowingAblationMarks(MF, window=window, matrix=None)
+        spaceM.RegionGrowAlg.reggrow_am_marks.regionGrowingAblationMarks(MF,
+                                                                         window=window,
+                                                                         matrix=matrix_type,
+                                                                         maxDist=maxDist)
         spaceM.AMFinder.am_filter.AM_filter(MF, window=window)
 
 

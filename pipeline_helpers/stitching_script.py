@@ -276,8 +276,8 @@ def stitchMicroscopy(MF,
                      fiji_path,
                      merge_filenames=[],
                      merge_colors=[],
-                     preMALDI=False,
-                     postMALDI=True,
+                     preMALDI=True,
+                     postMALDI=False,
                      transform=None,
                      start_index=0):
 
@@ -383,13 +383,13 @@ def tf(img, transform=None):
 
 
 if __name__ == '__main__':
-    fiji_path = 'C:\\Users\\User\\Downloads\\fiji-win64-20140602\\Fiji.app\\ImageJ-win64.exe'
-    MF = 'C:\\Users\\User\\Documents\\Datasets\\1_1mM_Tet_UNW_DMEM\\'
+    fiji_path = '/home/renat/EMBL/software/Fiji.app/ImageJ-linux64'
+    MF = '/home/renat/EMBL/Sharaz_images/1_1mM_Tet_UNW_DMEM/'
     # Possible transformations to the tiled images
     # transform = 'left_right'
     # transform = 'upside_down'
     # transform = 'left_right_upside_down'
     # transform = '' # will produce no transformation
     transform = ''
-    st_index = 1
+    st_index = 1 # Starting index of tiles
     stitchMicroscopy(MF, tf, fiji_path, transform, start_index=st_index)

@@ -3,8 +3,9 @@ from mainwindow_ui import Ui_MainWindow
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QThread
 import logging
-from gen_settings.gensettings import GenSettings as gs
+from global_vars.global_vars import GlobalVars as gv
 from tabs.Am_finder_tab import AmFinderTab as amfTab
+from tabs.Gen_Settings_tab import GenSettingsTab as gsTab
 from tabs.Grab_ms_data_tab import GrabMSDataTab as gmsTab
 from pipelineController import *
 from workers.Full_pipe_worker import FullPipeWorker
@@ -33,9 +34,9 @@ logging.info("Running spaceM v0.1")
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
-        self.step = 0
+        self.step = 4
         self.setupUi(self)
-        self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'gen_settings'))
+        self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'global_vars'))
         self.setup_tabs()
         self.setup_workers()
         self.connect_callbacks()
@@ -52,7 +53,8 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         self.setup_gen_csv_thread()
 
     def setup_tabs(self):
-        gs(self)
+        gv()
+        gsTab(self)
         amfTab(self)
         gmsTab(self)
 
@@ -177,14 +179,14 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
 
                 self.lineEditStitchedPreMImage.setText(settings['stitchedImgPreMPath'])
                 self.lineEditStitchedPostMImage.setText(settings['stitchedImgPostMPath'])
-                self.lineEditStitPreMDapiImage.setText(settings['preMaldiDapi'])
-                self.lineEditStitPostMDapiImage.setText(settings['postMaldiDapi'])
-                self.lineEditStitPreMSampleImage.setText(settings['preMaldiSample'])
-                self.lineEditCompositeImg.setText(settings['compositeImgPath'])
+                # self.lineEditStitPreMDapiImage.setText(settings['preMaldiDapi'])
+                # self.lineEditStitPostMDapiImage.setText(settings['postMaldiDapi'])
+                # self.lineEditStitPreMSampleImage.setText(settings['preMaldiSample'])
+                # self.lineEditCompositeImg.setText(settings['compositeImgPath'])
                 self.lineEditCPpipeFile.setText(settings['cpPipeLine'])
 
                 self.lineEditUdpFile.setText(settings['udpFile'])
-                self.lineEditimzMLName.setText(settings['imzMLName'])
+                self.lineEditMSDsName.setText(settings['MSDsName'])
                 self.lineEditMetadata.setText(settings['maldiMetadata'])
         else:
             QMessageBox.warning(self, "Warning", "No settings file found!")
@@ -232,31 +234,32 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                 self.thread_8.start()
 
     def validate_inputs(self):
-        self.inpPath = gs.get_main_folder(self)
-        self.pythonPath = gs.get_python(self)
-        self.cellprofilerPath = gs.get_cellprofiler(self)
+        self.inpPath = gsTab.get_main_folder(self)
+        self.pythonPath = gsTab.get_python(self)
+        self.cellprofilerPath = gsTab.get_cellprofiler(self)
 
-        self.stitchedPreMImage = gs.get_stitchedPreMImage(self)
-        self.stitchedPostMImage = gs.get_stitchedPostMImage(self)
-        self.stitPreMDapiImage = gs.get_stitPreMDapiImage(self)
-        self.stitPostMDapiImage = gs.get_stitPostMDapiImage(self)
-        self.stitPreMSampleImage = gs.get_stitPreMSampleImage(self)
-        self.compositeImg = gs.get_compositeImg(self)
-        self.CPpipeFile = gs.get_CPpipeFile(self)
-        self.udpFile = gs.get_udpFile(self)
-        self.imzMLName = gs.get_imzMLName(self)
-        self.metadata = gs.get_metadata(self)
+        self.stitchedPreMImage = gsTab.get_stitchedPreMImage(self)
+        self.stitchedPostMImage = gsTab.get_stitchedPostMImage(self)
+        # self.stitPreMDapiImage = gs.get_stitPreMDapiImage(self)
+        # self.stitPostMDapiImage = gs.get_stitPostMDapiImage(self)
+        # self.stitPreMSampleImage = gs.get_stitPreMSampleImage(self)
+        # self.compositeImg = gs.get_compositeImg(self)
+        # self.CPpipeFile = gs.get_CPpipeFile(self)
+        self.udpFile = gsTab.get_udpFile(self)
+        self.MSDsName = gsTab.get_MSDsName(self)
+        self.metadata = gsTab.get_metadata(self)
 
         self.MSLogin = gmsTab.get_MSLogin()
         self.MSPass = gmsTab.get_MSPass()
 
-        '''Tab 1'''
+        '''Tab AM'''
         #     TODO: DEV only - bypassing all checks
 
+        # if self.path
 
         # if (self.inpPath and self.pythonPath and self.stitchedPreMImage and \
         #     self.stitchedPostMImage and self.stitPreMDapiImage and self.stitPostMDapiImage  \
-        #     and self.compositeImg and self.udpFile and self.imzMLName \
+        #     and self.compositeImg and self.udpFile and self.MSDsName \
         #         and self.metadata) == '':
         #     QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
         #
@@ -295,19 +298,19 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         if self.step == 1:
             self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'amf_tab'))
             self.set_btns_static_state()
-            # self.thread_0.terminate()
+            self.thread_0.terminate()
         elif self.step == 2:
             self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'fids_tab'))
             self.set_btns_static_state()
-            # self.thread_1.terminate()
+            self.thread_1.terminate()
         elif self.step == 3:
             self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'reg_tab'))
             self.set_btns_static_state()
-            # self.thread_2.terminate()
+            self.thread_2.terminate()
         elif self.step == 4:
             self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'grab_ms_data_tab'))
             self.set_btns_static_state()
-            # self.thread_3.terminate()
+            self.thread_3.terminate()
         elif self.step == 5:
             self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'cell_segm_tab'))
             self.set_btns_static_state()

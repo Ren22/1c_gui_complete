@@ -15,12 +15,13 @@ class AMWorker(QObject):
 
     def work_1(self):
         self.find_am.step1()
+        self.find_am.step2()
         self.progressBarSig.emit(10)
         self.incrementStepSig.emit()
         self.changeTabSig.emit()
 
     def work_2(self):
-        self.find_am.step2()
+        self.find_am.step3()
         self.progressBarSig.emit(20)
         self.incrementStepSig.emit()
         self.changeTabSig.emit()
