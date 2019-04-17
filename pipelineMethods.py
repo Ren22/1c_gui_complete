@@ -139,23 +139,14 @@ def cell_distrib(MF, window):
     spaceM.scAnalysis.Segmentation.cellDistribution_MALDI(MF, window)
 
 
-def cell_outlines_gen(MF, cp_window):
-    compos_path = MF + 'Analysis/CellProfilerAnalysis/Composite.png' or \
-    MF + 'Analysis/CellProfilerAnalysis/Composite.tiff' or \
-    MF + 'Analysis/CellProfilerAnalysis/Composite.tif'
-    spaceM.scAnalysis.Segmentation.cellOutlines(compos_path,
-                                                       cp_window,
-                                                       MF + 'Analysis/CellProfilerAnalysis/Labelled_cells.tiff',
-                                                       MF + 'Analysis/CellProfilerAnalysis/Contour_cells_adjusted.png')
-
-
 def spatio_molecular_matrix(MF,
                           tf_obj,
-                          CDs=[0.88],
+                          CDs,
+                          cells_csv,
+                          fdr_level,
                           fetch_ann='online',
                           filter='correlation',
                           tol_fact=-0.2,
-                          fdr_level=0.5,
                           udp_path=None,
                           ms_login=None,
                           ms_password=None,
@@ -185,10 +176,21 @@ def spatio_molecular_matrix(MF,
 
     spaceM.scAnalysis.mergeMORPHnMOL.mergeMORPHnMOL(
         MF,
+        cells_csv=cells_csv,
         CDs=CDs,
         fetch_ann=fetch_ann,
         tol_fact=tol_fact,
         filter=filter)
+
+
+def cell_outlines_gen(MF, cp_window):
+    compos_path = MF + 'Analysis/CellProfilerAnalysis/Composite.png' or \
+    MF + 'Analysis/CellProfilerAnalysis/Composite.tiff' or \
+    MF + 'Analysis/CellProfilerAnalysis/Composite.tif'
+    spaceM.scAnalysis.Segmentation.cellOutlines(compos_path,
+                                                       cp_window,
+                                                       MF + 'Analysis/CellProfilerAnalysis/Labelled_cells.tiff',
+                                                       MF + 'Analysis/CellProfilerAnalysis/Contour_cells_adjusted.png')
 
 
 def map_intensities_on_cells(MF, tf_obj):

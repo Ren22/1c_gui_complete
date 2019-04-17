@@ -7,6 +7,7 @@ from global_vars.global_vars import GlobalVars as gv
 from tabs.Am_finder_tab import AmFinderTab as amfTab
 from tabs.Gen_Settings_tab import GenSettingsTab as gsTab
 from tabs.Grab_ms_data_tab import GrabMSDataTab as gmsTab
+from tabs.GenCsv_tab import GenCsvTab as genCsvTab
 from pipelineController import *
 from workers.Full_pipe_worker import FullPipeWorker
 from workers.Am_finder_worker import AMWorker
@@ -15,6 +16,8 @@ from workers.Reg_image_worker import RegImageWorker
 from workers.Grab_ms_data_worker import GrabMSDataWorker
 from workers.Cell_profiler_worker import CPWorker
 from workers.Gen_csv_worker import GenCSVWorker
+from sys import platform
+
 
 if not os.path.exists('./logs'):
     os.makedirs('./logs')
@@ -34,7 +37,7 @@ logging.info("Running spaceM v0.1")
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
-        self.step = 4
+        self.step = 7
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'global_vars'))
         self.setup_tabs()
@@ -57,6 +60,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
         gsTab(self)
         amfTab(self)
         gmsTab(self)
+        genCsvTab(self)
 
     def setup_full_thread(self):
         self.thread_full = QThread()
@@ -179,15 +183,18 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
 
                 self.lineEditStitchedPreMImage.setText(settings['stitchedImgPreMPath'])
                 self.lineEditStitchedPostMImage.setText(settings['stitchedImgPostMPath'])
-                # self.lineEditStitPreMDapiImage.setText(settings['preMaldiDapi'])
-                # self.lineEditStitPostMDapiImage.setText(settings['postMaldiDapi'])
-                # self.lineEditStitPreMSampleImage.setText(settings['preMaldiSample'])
-                # self.lineEditCompositeImg.setText(settings['compositeImgPath'])
-                self.lineEditCPpipeFile.setText(settings['cpPipeLine'])
 
                 self.lineEditUdpFile.setText(settings['udpFile'])
-                self.lineEditMSDsName.setText(settings['MSDsName'])
                 self.lineEditMetadata.setText(settings['maldiMetadata'])
+
+                self.tab_amf_FluoCh.setText(settings['postMaldiDapi'])
+                self.tab_amf_ifftImgPath.setText(settings['manProcessedImgPath'])
+
+                self.tab_gms_lineEditMSDs.setText(settings['MSDsName'])
+
+                self.lineEditCPpipeFile.setText(settings['cpPipeLine'])
+
+                self.tab_csvGen_lineEditCells.setText(settings['csvCellsPath'])
         else:
             QMessageBox.warning(self, "Warning", "No settings file found!")
             Exception('Settings file was not found or does not exist')
@@ -234,43 +241,49 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                 self.thread_8.start()
 
     def validate_inputs(self):
-        self.inpPath = gsTab.get_main_folder(self)
-        self.pythonPath = gsTab.get_python(self)
-        self.cellprofilerPath = gsTab.get_cellprofiler(self)
-
-        self.stitchedPreMImage = gsTab.get_stitchedPreMImage(self)
-        self.stitchedPostMImage = gsTab.get_stitchedPostMImage(self)
-        # self.stitPreMDapiImage = gs.get_stitPreMDapiImage(self)
-        # self.stitPostMDapiImage = gs.get_stitPostMDapiImage(self)
-        # self.stitPreMSampleImage = gs.get_stitPreMSampleImage(self)
-        # self.compositeImg = gs.get_compositeImg(self)
-        # self.CPpipeFile = gs.get_CPpipeFile(self)
-        self.udpFile = gsTab.get_udpFile(self)
-        self.MSDsName = gsTab.get_MSDsName(self)
-        self.metadata = gsTab.get_metadata(self)
-
-        self.MSLogin = gmsTab.get_MSLogin()
-        self.MSPass = gmsTab.get_MSPass()
-
-        '''Tab AM'''
-        #     TODO: DEV only - bypassing all checks
-
-        # if self.path
-
-        # if (self.inpPath and self.pythonPath and self.stitchedPreMImage and \
-        #     self.stitchedPostMImage and self.stitPreMDapiImage and self.stitPostMDapiImage  \
-        #     and self.compositeImg and self.udpFile and self.MSDsName \
-        #         and self.metadata) == '':
-        #     QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are not empty")
-        #
-        # elif (self.MSLogin and self.MSPass) == '':
-        #         btnEnterMsLogin = QMessageBox.question(self, "Warning", "You haven't entered Metaspace login and Password on "
-        #                                              "Grab MS data tab, so you won't be able to access any "
-        #                                              "private datasets uploaded to the Metaspace. Proceed anyway?")
-        #         if btnEnterMsLogin == QMessageBox.Yes:
-        #             return True
-        # else:
-        return True
+        if self.step == 0:
+            check_line = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
+            and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata
+            if platform == "win32":
+                check_line = check_line and global_vars.cellprofilerPath
+            if check_line == '':
+                QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
+                                                     "not empty for general settings")
+            else:
+                return True
+        elif self.step == 1:
+            if global_vars.tab_amf_postMaldiDapi == '' and self.tab_amf_cbMatrix.currentText() == 'DHB' or \
+                self.tab_amf_manFftRb.isChecked() and global_vars.tab_amf_ifftImage == '':
+                QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
+                                                     "not empty for general settings")
+            else:
+                return True
+        elif self.step == 4:
+            prev_checks = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
+            and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata and \
+            (global_vars.tab_amf_postMaldiDapi == '' and self.tab_amf_cbMatrix.currentText() == 'DHB' or \
+                self.tab_amf_manFftRb.isChecked() and global_vars.tab_amf_ifftImage == '')
+            if global_vars.tab_gms_msDSName == '':
+                QMessageBox.warning(self, "Warning", "Please make sure that your provided the name of the "
+                                                     "dataset")
+            elif prev_checks == '':
+                QMessageBox.warning(self, "Warning", "Please make sure that all the paths from the previous steps "
+                                                     "are provided")
+            else:
+                return True
+        elif self.step == 7:
+            prev_checks = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
+                          and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata and \
+                          (global_vars.tab_amf_postMaldiDapi == '' and self.tab_amf_cbMatrix.currentText() == 'DHB' or \
+                           self.tab_amf_manFftRb.isChecked() and global_vars.tab_amf_ifftImage == '') and \
+                          global_vars.tab_gms_msDSName
+            if global_vars.tab_genCsv_csvFilePath == '':
+                QMessageBox.warning(self, "Warning", "Please make sure that your provided the csv file with features path")
+            elif prev_checks == '':
+                QMessageBox.warning(self, "Warning", "Please make sure that all the paths from the previous steps "
+                                                     "are provided")
+            else:
+                return True
 
     '''Running threads of workers/Full pipeline'''
     def run_full_pipe(self):

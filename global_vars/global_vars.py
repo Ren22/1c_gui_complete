@@ -32,4 +32,9 @@ class GlobalVars:
         '''Tab running Cellprofiler'''
         self.cpPipeLine = ''
 
+        '''Tab generating csv with mole features'''
+        self.tab_genCsv_CDThresh = 0.88
+        self.tab_genCsv_csvFilePath = ''
+
+
 global_vars = GlobalVars()

@@ -46,6 +46,10 @@ class Analysis():
         self.DATABASE = global_vars.tab_gms_database
         self.FDR = global_vars.tab_gms_fdr
 
+        '''GENERATE CSV FILE WITH MOL FEATURES'''
+        self.CD_THRESH = global_vars.tab_genCsv_CDThresh
+        self.CSVFILE_PATH = global_vars.tab_genCsv_csvFilePath
+
         '''EXTRA'''
         self.MFA = self.MF + 'Analysis/'
         self.AM_CURATOR = abl_mark_handler.__file__
@@ -214,6 +218,8 @@ class GenerateCSV():
     def step1(self):
         self.vars.get_paths()
         pipelineMethods.spatio_molecular_matrix(self.vars.MF,
+                                                CDs=self.vars.CD_THRESH,
+                                                cells_csv=self.vars.CSVFILE_PATH,
                                                 tf_obj=utils.ion2fluoTF,
                                                 udp_path=self.vars.UDP_FILE,
                                                 ms_login=self.vars.MS_LOGIN,

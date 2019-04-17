@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 from pipelineController import *
 
+
 class CPWorker(QObject):
 
     progressBarSig = pyqtSignal(int)

@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import *
 from global_vars.global_vars import global_vars
-from PyQt5.QtCore import pyqtSignal
 
 class AmFinderTab():
     def __init__(self, ext_obj):

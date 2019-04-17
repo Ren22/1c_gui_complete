@@ -227,14 +227,14 @@ class GenSettingsTab():
     # def get_CPpipeFile(ext_obj):
     #     return ext_obj.lineEditCPpipeFile.text()
 
-    @staticmethod 
-    def get_udpFile(ext_obj):
-        return ext_obj.lineEditUdpFile.text()
-
-    @staticmethod 
-    def get_MSDsName(ext_obj):
-        return ext_obj.lineEditMSDsName.text()
-
-    @staticmethod 
-    def get_metadata(ext_obj):
-        return ext_obj.lineEditMetadata.text()
+    # @staticmethod
+    # def get_udpFile(ext_obj):
+    #     return ext_obj.lineEditUdpFile.text()
+    #
+    # @staticmethod
+    # def get_MSDsName(ext_obj):
+    #     return ext_obj.lineEditMSDsName.text()
+    #
+    # @staticmethod
+    # def get_metadata(ext_obj):
+    #     return ext_obj.lineEditMetadata.text()
