@@ -1,0 +1,17 @@
+boto3==1.9.53
+botocore==1.12.53
+numpy==1.15.3
+pandas==0.24.2
+Pillow==6.0.0
+plotly==3.7.1
+pyMSpec==0.1.2
+PyQt5==5.9.2
+requests==2.21.0
+scikit-image==0.15.0
+scikit-learn==0.20.3
+scipy==1.2.1
+seaborn==0.9.0
+sklearn==0.0
+tifffile==2019.3.18
+tqdm==4.31.1
+urllib3==1.24.1
