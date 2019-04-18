@@ -5,14 +5,18 @@
 
     "stitchedImgPreMPath": "/home/renat/EMBL/vero/Well2/Analysis/StitchedMicroscopy/preMALDI_FLR/img_t1_z1_c1",
     "stitchedImgPostMPath": "/home/renat/EMBL/vero/Well2/Analysis/StitchedMicroscopy/postMALDI_FLR/img_t1_z1_c1",
-    "postMaldiDapi": "",
-    "compositeImgPath": "",
-    "cpPipeLine": "",
 
     "udpFile": "/home/renat/EMBL/vero/Well2/Metafiles/Slice3.UDP",
     "maldiMetadata": "/home/renat/EMBL/vero/Well2/Input/Microscopy/postMALDI/Well2.txt",
 
-    "MSDsName": "",
+    "postMaldiDapi": "",
+    "manProcessedImgPath": "/home/renat/EMBL/vero/Well2/Analysis/gridFit/FT_filtered.tiff",
+
+    "MSDsName": "20190307_mouse7-8C_pos300-1800_M0_Sl3W2",
     "database": "SwissLipids-2018-02-02",
-    "fdr": 0.2
+    "fdr": 0.1,
+
+    "cpPipeLine": "",
+
+    "csvCellsPath": "/home/renat/EMBL/vero/Well2/Analysis/CellProfilerAnalysis/Cells.csv"
 }
