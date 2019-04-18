@@ -20,12 +20,10 @@ class Analysis():
 
         self.STITCHED_PRE = global_vars.stitchedImgPreMPath
         self.STITCHED_POST = global_vars.stitchedImgPostMPath
-        # self.PREM_DAPI = global_vars.preMaldiDapi
-        # self.PREM_FLUO = global_vars.preMaldiSample
         # self.COMPOSITE_PNG = global_vars.compositeImgPath
 
         self.UDP_FILE = global_vars.udpFile
-        self.MALDI_METADATA = global_vars.maldiMetadata
+        self.MICROSCOPY_METADATA = global_vars.microscopyMetadata
 
         '''AM FINDER TAB'''
         self.TAB_AMF_MATRIX_TYPE = global_vars.tab_amf_matrixType
@@ -35,7 +33,7 @@ class Analysis():
         self.TAB_AMF_MAX_DIST = global_vars.tab_amf_maxDist
         self.TAB_AMF_POSTM_DAPI = global_vars.tab_amf_postMaldiDapi
         # self.TAB_AMF_SHOW_RES = global_vars.tab_amf_showRes
-#
+
         '''CELL SEGMENTATION'''
         self.CP_PIPELINE = global_vars.cpPipeLine
 
@@ -74,8 +72,8 @@ class FindAMinPM():
     def step2(self):
         print('Cropping of other channels started')
         self.vars.get_paths()
-        if not os.path.exists(self.vars.MF + '/Analysis/gridFit/cropped_postM_channels'):
-            os.makedirs(self.vars.MF + '/Analysis/gridFit/cropped_postM_channels')
+        if not os.path.exists(self.vars.MF + '/Analysis/cropped_postM_channels'):
+            os.makedirs(self.vars.MF + '/Analysis/cropped_postM_channels')
         utils.prepared_cropped_img_amfinder(self.vars.MF, "{}AM_cropped.tif".format(self.vars.GRIDFIT), 'post')
         print('Cropping of other channels finished')
         # Croping here
@@ -86,7 +84,7 @@ class FindAMinPM():
         if self.vars.TAB_AMF_POSTM_DAPI:
             utils.cropFluo_img(self.vars.TAB_AMF_POSTM_DAPI,
                                    bf_img_p="{}AM_cropped.tif".format(self.vars.GRIDFIT),
-                                   output_p=self.vars.GRIDFIT + '/',
+                                   output_p=self.vars.MFA,
                                    coords_p=self.vars.MF + 'Analysis/gridFit/AM_cropped_coords.npy',
                                    name='AM_cropped_2')
         print('Cropping and preparing dapi channel image finished')
@@ -95,14 +93,11 @@ class FindAMinPM():
         pipelineMethods.ablation_mark_filter(
             MF=self.vars.MF,
             postMaldiImgPath=self.vars.STITCHED_POST,
-            # postMFluoOutputPath=self.vars.GRIDFIT,
             postMFluoPath="{}AM_cropped_2.tif".format(self.vars.GRIDFIT),
             UDPpath=self.vars.UDP_FILE,
-            maldiMetadataPath=self.vars.MALDI_METADATA,
-            # bf_img_p="{}AM_cropped.tif".format(self.vars.GRIDFIT),
+            microscopyMetadataPath=self.vars.MICROSCOPY_METADATA,
             iterations=self.vars.TAB_AMF_ITERATIONS,
             gblur_sigma=self.vars.TAB_AMF_GBLUR_SIGMA,
-            # show_results=self.vars.TAB_AMF_SHOW_RES,
             iFFTImage_p=self.vars.TAB_AMF_iFFT_IMAGE_P,
             matrix_type=self.vars.TAB_AMF_MATRIX_TYPE,
             maxDist=self.vars.TAB_AMF_MAX_DIST,
@@ -225,7 +220,8 @@ class GenerateCSV():
                                                 ms_login=self.vars.MS_LOGIN,
                                                 ms_password=self.vars.MS_PASS,
                                                 ds_name=self.vars.MSDATA_FILENAME,
-                                                fdr_level=self.vars.FDR)
+                                                fdr_level=self.vars.FDR,
+                                                databases=self.vars.DATABASE)
 
     def step2(self):
         self.vars.get_paths()

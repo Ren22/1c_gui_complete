@@ -37,7 +37,7 @@ logging.info("Running spaceM v0.1")
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
-        self.step = 0
+        self.step = 7
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'global_vars'))
         self.setup_tabs()
@@ -169,6 +169,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
 
     def connect_callbacks(self):
         self.btnImprtSettings.clicked.connect(self.import_settings)
+        self.btnSaveSettings.clicked.connect(self.save_settings)
         self.btnRunNextStep.clicked.connect(self.run_prev_or_next_step)
         self.btnRepeatStep.clicked.connect(self.repeat_step)
         self.btnStartAnalysis.clicked.connect(self.run_full_pipe_check)
@@ -185,7 +186,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                 self.lineEditStitchedPostMImage.setText(settings['stitchedImgPostMPath'])
 
                 self.lineEditUdpFile.setText(settings['udpFile'])
-                self.lineEditMetadata.setText(settings['maldiMetadata'])
+                self.lineEditMetadata.setText(settings['microscopyMetadata'])
 
                 self.tab_amf_FluoCh.setText(settings['postMaldiDapi'])
                 self.tab_amf_ifftImgPath.setText(settings['manProcessedImgPath'])
@@ -195,6 +196,32 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                 self.lineEditCPpipeFile.setText(settings['cpPipeLine'])
 
                 self.tab_csvGen_lineEditCells.setText(settings['csvCellsPath'])
+        else:
+            QMessageBox.warning(self, "Warning", "No settings file found!")
+            Exception('Settings file was not found or does not exist')
+
+    def save_settings(self):
+        if os.path.exists('./configs/settings.json'):
+            with open('./configs/settings.json', 'r') as f:
+                settings = json.load(f)
+                settings['inp_path'] = global_vars.inpPath
+                settings['python_path'] = global_vars.pythonPath
+                settings['cellprofilerPath'] = global_vars.cellprofilerPath
+
+                settings['stitchedImgPreMPath'] = global_vars.stitchedImgPreMPath
+                settings['stitchedImgPostMPath'] = global_vars.stitchedImgPostMPath
+
+                settings['udpFile'] = global_vars.udpFile
+                settings['microscopyMetadata'] = global_vars.microscopyMetadata
+
+                settings['MSDsName'] = global_vars.tab_gms_msDSName
+
+                settings['cpPipeLine'] = global_vars.cpPipeLine
+
+                settings['csvCellsPath'] = global_vars.tab_genCsv_csvFilePath
+            with open('./configs/settings.json', 'w') as f:
+                json.dump(settings, f)
+                QMessageBox.information(self, "Info", "The new settings were saved")
         else:
             QMessageBox.warning(self, "Warning", "No settings file found!")
             Exception('Settings file was not found or does not exist')
@@ -243,12 +270,13 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
     def validate_inputs(self):
         if self.step == 0:
             check_line = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
-            and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata
+            and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.microscopyMetadata
             if platform == "win32":
                 check_line = check_line and global_vars.cellprofilerPath
             if check_line == '':
                 QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
                                                      "not empty for general settings")
+                return
             else:
                 return True
         elif self.step == 1:
@@ -256,6 +284,7 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                 self.tab_amf_manFftRb.isChecked() and global_vars.tab_amf_ifftImage == '':
                 QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
                                                      "not empty for general settings")
+                return
             else:
                 return True
         elif self.step == 2 or self.step==3:
@@ -264,20 +293,23 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
             if check_line == '':
                 QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
                                                      "not empty for general settings")
+                return
             else:
                 return True
         elif self.step == 4:
             prev_checks = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
-            and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata \
+            and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.microscopyMetadata \
             #               and \
             # (global_vars.tab_amf_postMaldiDapi == '' and self.tab_amf_cbMatrix.currentText() == 'DHB' or \
             #     self.tab_amf_manFftRb.isChecked() and global_vars.tab_amf_ifftImage == '')
             if global_vars.tab_gms_msDSName == '':
                 QMessageBox.warning(self, "Warning", "Please make sure that your provided the name of the "
                                                      "dataset")
+                return
             elif prev_checks == '':
                 QMessageBox.warning(self, "Warning", "Please make sure that all the paths from the previous steps "
                                                      "are provided")
+                return
             else:
                 return True
         elif self.step == 5:
@@ -286,32 +318,38 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                 return
             else:
                 check_line = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
-                             and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata
+                             and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.microscopyMetadata
                 if check_line == '':
                     QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
                                                          "not empty for general settings")
+                    return
                 else:
                     return True
         elif self.step == 6:
             check_line = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
-                          and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata and \
+                          and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.microscopyMetadata and \
                           global_vars.tab_gms_msDSName
             if check_line == '':
                 QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
                                                      "not empty for general settings")
+                return
             else:
                 return True
         elif self.step == 7:
             prev_checks = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
-                          and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata and \
-                          (global_vars.tab_amf_postMaldiDapi == '' and self.tab_amf_cbMatrix.currentText() == 'DHB' or \
-                           self.tab_amf_manFftRb.isChecked() and global_vars.tab_amf_ifftImage == '') and \
-                          global_vars.tab_gms_msDSName
+                          and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.microscopyMetadata
             if global_vars.tab_genCsv_csvFilePath == '':
-                QMessageBox.warning(self, "Warning", "Please make sure that your provided the csv file with features path")
+                QMessageBox.warning(self, "Warning",
+                                "Please make sure that your provided the csv file with features path")
+                return
+            elif global_vars.tab_gms_msDSName == '':
+                QMessageBox.warning(self, "Warning",
+                                    "Please provide dataset's metaspace name")
+                return
             elif prev_checks == '':
                 QMessageBox.warning(self, "Warning", "Please make sure that all the paths from the previous steps "
                                                      "are provided")
+                return
             else:
                 return True
 

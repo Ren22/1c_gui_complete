@@ -10,15 +10,9 @@ class GenSettingsTab():
     
         ext_obj.btnStitchedPreMBfImg.clicked.connect(lambda: self.define_stitched_img_prem_bf(ext_obj))
         ext_obj.btnStitchedPostMBfImg.clicked.connect(lambda: self.define_stitched_img_postm_bf(ext_obj))
-        # ext_obj.btnStitchedPreMDapiImg.clicked.connect(lambda: self.define_stitched_img_prem_dapi(ext_obj))
-        # ext_obj.btnStitchedPostMDapiImg.clicked.connect(lambda: self.define_stitched_img_postm_dapi(ext_obj))
-        # ext_obj.btnStitchedPreMSampleImg.clicked.connect(lambda: self.define_stitched_img_prem_sample(ext_obj))
-        # ext_obj.btnCompositeImg.clicked.connect(lambda: self.define_composite_img(ext_obj))
-        # ext_obj.btnCpPipeFile.clicked.connect(lambda: self.define_cp_pipeline(ext_obj))
-    
+
         ext_obj.btnUdpFile.clicked.connect(lambda: self.define_udp_file(ext_obj))
-        # ext_obj.btnImzMLFilename.clicked.connect(lambda: self.define_msDsName(ext_obj))
-        ext_obj.btnMALDImetadata.clicked.connect(lambda: self.define_maldi_metadata(ext_obj))
+        ext_obj.btnMicroscopyMetadata.clicked.connect(lambda: self.define_micriscopy_metadata(ext_obj))
     
         ext_obj.lineEditMainFolder.textChanged[str].connect(lambda: self.set_main_folder(ext_obj))
         ext_obj.lineEditPythonPath.textChanged[str].connect(lambda: self.set_python(ext_obj))
@@ -26,14 +20,8 @@ class GenSettingsTab():
     
         ext_obj.lineEditStitchedPreMImage.textChanged[str].connect(lambda: self.set_stitchedPreMImage(ext_obj))
         ext_obj.lineEditStitchedPostMImage.textChanged[str].connect(lambda: self.set_stitchedPostMImage(ext_obj))
-        # ext_obj.lineEditStitPreMDapiImage.textChanged[str].connect(lambda: self.set_stitPreMDapiImage(ext_obj))
-        # ext_obj.lineEditStitPostMDapiImage.textChanged[str].connect(lambda: self.set_stitPostMDapiImage(ext_obj))
-        # ext_obj.lineEditStitPreMSampleImage.textChanged[str].connect(lambda: self.set_stitPreMSampleImage(ext_obj))
-        # ext_obj.lineEditCompositeImg.textChanged[str].connect(lambda: self.set_compositeImg(ext_obj))
-        # ext_obj.lineEditCPpipeFile.textChanged[str].connect(lambda: self.set_CPpipeFile(ext_obj))
-    
+
         ext_obj.lineEditUdpFile.textChanged[str].connect(lambda: self.set_udpFile(ext_obj))
-        # ext_obj.lineEditMSDsName.textChanged[str].connect(lambda: self.set_msDsName(ext_obj))
         ext_obj.lineEditMetadata.textChanged[str].connect(lambda: self.set_metadata(ext_obj))
 
     @staticmethod
@@ -83,29 +71,6 @@ class GenSettingsTab():
         global_vars.stitchedImgPostMPath = path
         ext_obj.lineEditStitchedPostMImage.setText(path)
 
-    #
-    # def define_stitched_img_prem_dapi(self, ext_obj):
-    #     path = self.file_path_finder(ext_obj)
-    #     global_vars.set_pre_stitched_image_dapi_path(path)
-    #     ext_obj.lineEditStitPreMDapiImage.setText(path)
-    #
-    # def define_stitched_img_postm_dapi(self, ext_obj):
-    #     path = self.file_path_finder(ext_obj)
-    #     global_vars.set_post_stitched_image_dapi_path(path)
-    #     ext_obj.lineEditStitPostMDapiImage.setText(path)
-
-
-    # def define_composite_img(self, ext_obj):
-    #     path = self.file_path_finder(ext_obj)
-    #     global_vars.set_composite_path(path)
-    #     ext_obj.lineEditCompositeImg.setText(path)
-
-    # def define_cp_pipeline(self, ext_obj):
-    #     path = self.file_path_finder(ext_obj)
-    #     global_vars.set_cp_pipe_path(path)
-    #     ext_obj.lineEditCPpipeFile.setText(path)
-
-
 
     def define_udp_file(self, ext_obj):
         path = self.file_path_finder(ext_obj)
@@ -117,9 +82,9 @@ class GenSettingsTab():
         global_vars.msDSName = path
         ext_obj.lineEditMSDsName.setText(path)
 
-    def define_maldi_metadata(self, ext_obj):
+    def define_micriscopy_metadata(self, ext_obj):
         path = self.file_path_finder(ext_obj)
-        global_vars.maldiMetadata = path
+        global_vars.microscopyMetadata = path
         ext_obj.lineEditMetadata.setText(path)
 
 
@@ -128,62 +93,30 @@ class GenSettingsTab():
     @staticmethod
     def set_main_folder(ext_obj):
         global_vars.inpPath = ext_obj.lineEditMainFolder.text()
-        # global_vars.set_inp_path(ext_obj.lineEditMainFolder.text())
 
     @staticmethod
     def set_python(ext_obj):
         global_vars.pythonPath = ext_obj.lineEditPythonPath.text()
-        # global_vars.set_python_path(ext_obj.lineEditPythonPath.text())
 
     @staticmethod
     def set_cellprofiler(ext_obj):
         global_vars.cellprofilerPath = ext_obj.lineEditCellProfiler.text()
-        # global_vars.set_cellprofiler_path(ext_obj.lineEditCellProfiler.text())
 
     @staticmethod
     def set_stitchedPreMImage(ext_obj):
         global_vars.stitchedImgPreMPath = ext_obj.lineEditStitchedPreMImage.text()
-        # global_vars.set_pre_stitched_image_bf_path(ext_obj.lineEditStitchedPreMImage.text())
 
     @staticmethod
     def set_stitchedPostMImage(ext_obj):
         global_vars.stitchedImgPostMPath = ext_obj.lineEditStitchedPostMImage.text()
-        # global_vars.set_post_stitched_image_bf_path(ext_obj.lineEditStitchedPostMImage.text())
-
-    # @staticmethod
-    # def set_stitPreMDapiImage(ext_obj):
-    #     global_vars.set_pre_stitched_image_dapi_path(ext_obj.lineEditStitPreMDapiImage.text())
-    #
-    # @staticmethod
-    # def set_stitPostMDapiImage(ext_obj):
-    #     global_vars.set_post_stitched_image_dapi_path(ext_obj.lineEditStitPostMDapiImage.text())
-
-    # @staticmethod
-    # def set_stitPreMSampleImage(ext_obj):
-    #     global_vars.set_prem_stitched_image_sample_path(ext_obj.lineEditStitPreMSampleImage.text())
-    #
-    # @staticmethod
-    # def set_compositeImg(ext_obj):
-    #     global_vars.set_composite_path(ext_obj.lineEditCompositeImg.text())
-
-    # @staticmethod
-    # def set_CPpipeFile(ext_obj):
-    #     global_vars.set_cp_pipe_path(ext_obj.lineEditCPpipeFile.text())
 
     @staticmethod
     def set_udpFile(ext_obj):
         global_vars.udpFile = ext_obj.lineEditUdpFile.text()
-        # global_vars.set_udpfile_path(ext_obj.lineEditUdpFile.text())
-
-    # @staticmethod
-    # def set_msDsName(ext_obj):
-    #     global_vars.msDSName = ext_obj.lineEditMSDsName.text()
-        # global_vars.set_imzMLName(ext_obj.lineEditMSDsName.text())
 
     @staticmethod
     def set_metadata(ext_obj):
-        global_vars.maldiMetadata = ext_obj.lineEditMetadata.text()
-        # global_vars.set_maldiMetadata_path(ext_obj.lineEditMetadata.text())
+        global_vars.microscopyMetadata = ext_obj.lineEditMetadata.text()
 
 
     '''Getters'''
@@ -206,35 +139,3 @@ class GenSettingsTab():
     @staticmethod 
     def get_stitchedPostMImage(ext_obj):
         return ext_obj.lineEditStitchedPostMImage.text()
-
-    # @staticmethod
-    # def get_stitPreMDapiImage(ext_obj):
-    #     return ext_obj.lineEditStitPreMDapiImage.text()
-    #
-    # @staticmethod
-    # def get_stitPostMDapiImage(ext_obj):
-    #     return ext_obj.lineEditStitPostMDapiImage.text()
-
-    # @staticmethod
-    # def get_stitPreMSampleImage(ext_obj):
-    #     return ext_obj.lineEditStitPreMSampleImage.text()
-
-    # @staticmethod
-    # def get_compositeImg(ext_obj):
-    #     return ext_obj.lineEditCompositeImg.text()
-    #
-    # @staticmethod
-    # def get_CPpipeFile(ext_obj):
-    #     return ext_obj.lineEditCPpipeFile.text()
-
-    # @staticmethod
-    # def get_udpFile(ext_obj):
-    #     return ext_obj.lineEditUdpFile.text()
-    #
-    # @staticmethod
-    # def get_MSDsName(ext_obj):
-    #     return ext_obj.lineEditMSDsName.text()
-    #
-    # @staticmethod
-    # def get_metadata(ext_obj):
-    #     return ext_obj.lineEditMetadata.text()

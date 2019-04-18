@@ -3,18 +3,16 @@ import utils
 # TODO: temporal hack to test local spaceM
 import sys
 sys.path.insert(0, "../")
-from spaceM import spaceM
+import spaceM
 
 
 def ablation_mark_filter(MF,
                          postMaldiImgPath,
                          UDPpath,
-                         maldiMetadataPath,
-                         # bf_img_p,
+                         microscopyMetadataPath,
                          iterations,
                          gblur_sigma,
                          iFFTImage_p,
-                         # postMFluoOutputPath,
                          postMFluoPath,
                          matrix_type,
                          maxDist,
@@ -39,7 +37,7 @@ def ablation_mark_filter(MF,
                                     gblur_sigma=gblur_sigma,
                                     UDPpath=UDPpath,
                                     matrix_type=matrix_type,
-                                    maldiMetadataPath=maldiMetadataPath,
+                                    microscopyMetadataPath=microscopyMetadataPath,
                                     show_results=show_results,
                                     iFFTImage_p=iFFTImage_p,
                                     postMFluoPath=postMFluoPath)
@@ -144,6 +142,7 @@ def spatio_molecular_matrix(MF,
                           CDs,
                           cells_csv,
                           fdr_level,
+                          databases,
                           fetch_ann='online',
                           filter='correlation',
                           tol_fact=-0.2,
@@ -172,7 +171,9 @@ def spatio_molecular_matrix(MF,
         ms_login=ms_login,
         ms_password=ms_password,
         ds_name=ds_name,
-        fdr_level=fdr_level)
+        fdr_level=fdr_level,
+        databases=databases
+    )
 
     spaceM.scAnalysis.mergeMORPHnMOL.mergeMORPHnMOL(
         MF,

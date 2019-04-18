@@ -11,7 +11,7 @@ class GlobalVars:
         # self.compositeImgPath = ''
 
         self.udpFile = ''
-        self.maldiMetadata = ''
+        self.microscopyMetadata = ''
 
         '''Tab Ablation mark finder'''
         self.tab_amf_matrixType = ''

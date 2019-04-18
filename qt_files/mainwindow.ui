@@ -237,9 +237,6 @@ p, li { white-space: pre-wrap; }
                      </layout>
                     </item>
                    </layout>
-                   <zorder>layoutWidget_4</zorder>
-                   <zorder>groupBox_3</zorder>
-                   <zorder>groupBox_2</zorder>
                   </widget>
                  </item>
                  <item>
@@ -336,7 +333,6 @@ p, li { white-space: pre-wrap; }
                     </item>
                    </layout>
                    <zorder></zorder>
-                   <zorder>groupBox_3</zorder>
                   </widget>
                  </item>
                  <item>
@@ -370,7 +366,7 @@ p, li { white-space: pre-wrap; }
                        </spacer>
                       </item>
                       <item row="1" column="4">
-                       <widget class="QToolButton" name="btnMALDImetadata">
+                       <widget class="QToolButton" name="btnMicroscopyMetadata">
                         <property name="text">
                          <string>...</string>
                         </property>
@@ -614,12 +610,6 @@ p, li { white-space: pre-wrap; }
                       </layout>
                      </item>
                     </layout>
-                    <zorder>tab_amf_FluoCh</zorder>
-                    <zorder>tab_amf_FluoCh</zorder>
-                    <zorder>tab_amf_FluoCh</zorder>
-                    <zorder>tab_amf_FluoCh</zorder>
-                    <zorder>tab_amf_labelFluoCh</zorder>
-                    <zorder>tab_amf_btnFluoCh</zorder>
                    </widget>
                   </item>
                   <item row="0" column="0">
@@ -641,7 +631,6 @@ p, li { white-space: pre-wrap; }
                   </item>
                  </layout>
                  <zorder>tab_amf_cbMatrix</zorder>
-                 <zorder></zorder>
                  <zorder>tab_amf_gbFluoCh</zorder>
                 </widget>
                </item>
@@ -1100,16 +1089,11 @@ p, li { white-space: pre-wrap; }
                      <bool>false</bool>
                     </property>
                     <property name="currentRow">
-                     <number>0</number>
+                     <number>-1</number>
                     </property>
                     <property name="sortingEnabled">
                      <bool>true</bool>
                     </property>
-                    <item>
-                     <property name="text">
-                      <string>HMDB-v4</string>
-                     </property>
-                    </item>
                     <item>
                      <property name="text">
                       <string>BraChemDB-2018-01</string>
@@ -1117,22 +1101,17 @@ p, li { white-space: pre-wrap; }
                     </item>
                     <item>
                      <property name="text">
-                      <string>Chebi-2018-1</string>
+                      <string>ChEBI-2018-01</string>
                      </property>
                     </item>
                     <item>
                      <property name="text">
-                      <string>LipidMaps-2017-12-12</string>
+                      <string>HMDB-v2.5</string>
                      </property>
                     </item>
                     <item>
                      <property name="text">
-                      <string>PAMDB-v1.0</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>SwissLipids-2018-02-02</string>
+                      <string>HMDB-v4</string>
                      </property>
                     </item>
                     <item>
@@ -1152,7 +1131,17 @@ p, li { white-space: pre-wrap; }
                     </item>
                     <item>
                      <property name="text">
-                      <string>HMDB-v2.5</string>
+                      <string>LipidMaps-2017-12-12</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>PAMDB-v1.0</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>SwissLipids-2018-02-02</string>
                      </property>
                     </item>
                    </widget>
@@ -1523,7 +1512,7 @@ p, li { white-space: pre-wrap; }
          </size>
         </property>
         <property name="text">
-         <string>Run next step</string>
+         <string>Run step</string>
         </property>
        </widget>
       </item>

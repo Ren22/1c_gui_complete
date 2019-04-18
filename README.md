@@ -15,7 +15,9 @@ Put both directories into one next to each other.
 
 <strong><em>Common to all systems:</em></strong>
 
-- Use provided `requirements.txt` file from `./env_files` and install it with pip
+- Use provided `requirements.txt` file from `./env_files` and install it with pip:
+
+`pip install -r requirements.txt`
 - Install [metaspace](https://github.com/metaspace2020/metaspace/tree/master/metaspace/python-client) package from github
 
 - Install [Fiji 2014 June 02](https://imagej.net/Fiji/Downloads)

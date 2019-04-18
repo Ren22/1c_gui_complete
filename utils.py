@@ -86,14 +86,14 @@ def prepare_images(MF, window=0):
 
     if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/'):
         os.makedirs(MF + 'Analysis/CellProfilerAnalysis/')
-    if not os.path.exists(MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels'):
-        os.makedirs(MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels')
+    if not os.path.exists(MF + 'Analysis/cropped_preM_channels'):
+        os.makedirs(MF + 'Analysis/cropped_preM_channels')
     for file in os.listdir(MF + '/Analysis/StitchedMicroscopy/preMALDI_FLR'):
         if file.startswith('img_'):
             crop2coords(
                 MF + 'Analysis/Fiducials/transformedMarks.npy',
                 MF + '/Analysis/StitchedMicroscopy/preMALDI_FLR/' + file,
-                MF + 'Analysis/CellProfilerAnalysis/cropped_preM_channels/' +
+                MF + 'Analysis/cropped_preM_channels/' +
                 os.path.splitext(file)[0] + '_cropped',
                 window=window)
 
@@ -104,7 +104,7 @@ def prepared_cropped_img_amfinder(MF, bf_img_p, image_type):
             try:
                 cropFluo_img(MF + '/Analysis/StitchedMicroscopy/{}MALDI_FLR/'.format(image_type) + file,
                                    bf_img_p,
-                                   output_p=MF + '/Analysis/gridFit/cropped_{}M_channels/'.format(image_type, image_type),
+                                   output_p=MF + '/Analysis/cropped_{}M_channels/'.format(image_type, image_type),
                                    coords_p=MF + 'Analysis/gridFit/AM_cropped_coords.npy',
                                    name=os.path.splitext(file)[0] + '_cropped')
             except (FileNotFoundError, IOError):

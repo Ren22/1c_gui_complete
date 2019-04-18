@@ -16,5 +16,8 @@ class GenCSVWorker(QObject):
     def work_1(self):
         self.gen_csv_worker.step1()
         self.progressBarSig.emit(95)
-        self.gen_csv_worker.step2()
+        # TODO: the fucntionality of step 2 is to create images with cells intensities
+        # it should be implemented so that each molecule can have it
+        # self.gen_csv_worker.step2()
+        self.incrementStepSig.emit()
         self.progressBarSig.emit(100)
