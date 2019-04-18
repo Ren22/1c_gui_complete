@@ -37,7 +37,7 @@ logging.info("Running spaceM v0.1")
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
-        self.step = 7
+        self.step = 0
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'global_vars'))
         self.setup_tabs()
@@ -258,17 +258,47 @@ class SpaceMApp(QMainWindow, Ui_MainWindow):
                                                      "not empty for general settings")
             else:
                 return True
+        elif self.step == 2 or self.step==3:
+            check_line = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
+                         and global_vars.stitchedImgPostMPath
+            if check_line == '':
+                QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
+                                                     "not empty for general settings")
+            else:
+                return True
         elif self.step == 4:
             prev_checks = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
-            and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata and \
-            (global_vars.tab_amf_postMaldiDapi == '' and self.tab_amf_cbMatrix.currentText() == 'DHB' or \
-                self.tab_amf_manFftRb.isChecked() and global_vars.tab_amf_ifftImage == '')
+            and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata \
+            #               and \
+            # (global_vars.tab_amf_postMaldiDapi == '' and self.tab_amf_cbMatrix.currentText() == 'DHB' or \
+            #     self.tab_amf_manFftRb.isChecked() and global_vars.tab_amf_ifftImage == '')
             if global_vars.tab_gms_msDSName == '':
                 QMessageBox.warning(self, "Warning", "Please make sure that your provided the name of the "
                                                      "dataset")
             elif prev_checks == '':
                 QMessageBox.warning(self, "Warning", "Please make sure that all the paths from the previous steps "
                                                      "are provided")
+            else:
+                return True
+        elif self.step == 5:
+            if platform == "win32" and global_vars.cellprofilerPath == '':
+                QMessageBox.warning(self, "Warning", "Please check that the path to CellProfler.exe is provided")
+                return
+            else:
+                check_line = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
+                             and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata
+                if check_line == '':
+                    QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
+                                                         "not empty for general settings")
+                else:
+                    return True
+        elif self.step == 6:
+            check_line = global_vars.inpPath and global_vars.pythonPath and global_vars.stitchedImgPreMPath \
+                          and global_vars.stitchedImgPostMPath and global_vars.udpFile and global_vars.maldiMetadata and \
+                          global_vars.tab_gms_msDSName
+            if check_line == '':
+                QMessageBox.warning(self, "Warning", "Please check that all inputs are correctly entered and are "
+                                                     "not empty for general settings")
             else:
                 return True
         elif self.step == 7:
