@@ -1,8 +1,8 @@
 import os, gc
 import utils
 # TODO: temporal hack to test local spaceM
-import sys
-sys.path.insert(0, "../")
+# import sys
+# sys.path.insert(0, "../")
 import spaceM
 
 

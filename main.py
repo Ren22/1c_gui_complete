@@ -37,7 +37,7 @@ logging.info("Running spaceM v0.1")
 class SpaceMApp(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(SpaceMApp, self).__init__(parent)
-        self.step = 7
+        self.step = 2
         self.setupUi(self)
         self.tabWidget.setCurrentWidget(self.tabWidget.findChild(QWidget, 'global_vars'))
         self.setup_tabs()
